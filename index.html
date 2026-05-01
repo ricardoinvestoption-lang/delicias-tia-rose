@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Delícias da Tia Rose</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <h1 id="titulo-principal">Delícias da Tia Rose</h1>
+        <p>Doces feitos com amor</p>
+    </header>
+
+    <section class="categorias-container">
+        <h2 class="titulo-sessao">Conheça todos os nossos sabores</h2>
+        
+        <div class="carrossel-wrapper">
+            <!-- Botões de Navegação -->
+            <button class="seta seta-esq" onclick="scrollMenu(-1)">&#10094;</button>
+            <button class="seta seta-dir" onclick="scrollMenu(1)">&#10095;</button>
+
+            <!-- Container do Carrossel com ID para o JS -->
+            <div class="carrossel-scroll" id="menuCarrossel">
+                <div class="card-categoria" style="background-image: linear-gradient(to top, rgba(0,0,0,0.8), transparent), url('https://i.postimg.cc/7hfbrXLG/gelatinacolo.jpg');">
+                    <div class="info-card">
+                        <h3>DOCES</h3>
+                        <button class="btn-filtro" data-target="secao-doces">Saiba mais</button>
+                    </div>
+                </div>
+                <div class="card-categoria" style="background-image: linear-gradient(to top, rgba(0,0,0,0.8), transparent), url('https://i.postimg.cc/hvZm065h/balas.png');">
+                    <div class="info-card">
+                        <h3>BALAS DE COCO</h3>
+                        <button class="btn-filtro" data-target="secao-balas">Saiba mais</button>
+                    </div>
+                </div>
+                <div class="card-categoria" style="background-image: linear-gradient(to top, rgba(0,0,0,0.8), transparent), url('https://i.postimg.cc/VvhStMJq/Ovos.png');">
+                    <div class="info-card">
+                        <h3>OVOS DE PÁSCOA</h3>
+                        <button class="btn-filtro" data-target="secao-ovos">Saiba mais</button>
+                    </div>
+                </div>
+                <div class="card-categoria" style="background-image: linear-gradient(to top, rgba(0,0,0,0.8), transparent), url('https://i.postimg.cc/HxSjNFTT/bolocapa.jpg');">
+                    <div class="info-card">
+                        <h3>BOLOS</h3>
+                        <button class="btn-filtro" data-target="secao-bolos">Saiba mais</button>
+                    </div>
+                </div>
+                <div class="card-categoria" style="background-image: linear-gradient(to top, rgba(0,0,0,0.8), transparent), url('https://i.postimg.cc/GhZ8hF0F/salgados.jpg');">
+                    <div class="info-card">
+                        <h3>SALGADOS</h3>
+                        <button class="btn-filtro" data-target="secao-salgados">Saiba mais</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <main class="container">
+        <!-- ÁREA DE CADASTRO (ADMIN) -->
+        <section id="admin-section" style="display: none; padding: 20px; background: #fff; border-radius: 15px; margin-bottom: 30px;">
+            <h2>Painel de Controle - Tia Rose</h2>
+            <form id="doceForm">
+                <input type="text" id="nome" placeholder="Nome do Produto" required>
+                <input type="number" id="preco" placeholder="Preço" step="0.01" required>
+                <input type="url" id="urlImagem" placeholder="Link da Imagem" required>
+                <select id="categoria" required>
+                    <option value="" disabled selected>Selecione a Categoria</option>
+                    <option value="DOCES">Doces</option>
+                    <option value="BALAS DE COCO">Balas de Coco</option>
+                    <option value="OVOS DE PASCOA">Ovos de Páscoa</option>
+                    <option value="BOLOS">Bolos</option>
+                    <option value="SALGADOS">Salgados</option>
+                </select>
+                <button type="submit" style="background: #25d366; color: white; padding: 10px; border: none; cursor: pointer; border-radius: 5px;">Salvar na Nuvem</button>
+            </form>
+        </section>
+
+        <!-- VITRINES -->
+        <div id="secao-salgados" class="categoria-vitrine">
+            <h3 class="titulo-categoria">🥐 Salgados</h3>
+            <div id="listaSalgados" class="grid"></div>
+        </div>
+        <div id="secao-bolos" class="categoria-vitrine">
+            <h3 class="titulo-categoria">🍰 Bolos</h3>
+            <div id="listaBolos" class="grid"></div>
+        </div>
+        <div id="secao-doces" class="categoria-vitrine">
+            <h3 class="titulo-categoria">🍬 Doces</h3>
+            <div id="listaDoces" class="grid"></div>
+        </div>
+        <div id="secao-balas" class="categoria-vitrine">
+            <h3 class="titulo-categoria">🥥 Balas de Coco</h3>
+            <div id="listaBalas" class="grid"></div>
+        </div>
+        <div id="secao-ovos" class="categoria-vitrine">
+            <h3 class="titulo-categoria">🍫 Ovos de Páscoa</h3>
+            <div id="listaOvos" class="grid"></div>
+        </div>
+    </main>
+
+    <!-- FIREBASE CONFIG -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getFirestore, collection, addDoc, onSnapshot, deleteDoc, doc, query, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDz8gIhzGwn4oxTqVbg00ooaaGwneON0FA",
+            authDomain: "vitrine-delicias-da-tia-rose.firebaseapp.com",
+            projectId: "vitrine-delicias-da-tia-rose",
+            storageBucket: "vitrine-delicias-da-tia-rose.firebasestorage.app",
+            messagingSenderId: "674285117663",
+            appId: "1:674285117663:web:d67f6308e4c1e82ea5096a"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        window.db = db;
+        window.dbMetodos = { collection, addDoc, onSnapshot, deleteDoc, doc, query, orderBy };
+    </script>
+    <script src="script.js"></script>
+</body>
+</html>

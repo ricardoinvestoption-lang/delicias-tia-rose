@@ -1,0 +1,178 @@
+/* --- VARIÁVEIS DE CORES --- */
+:root {
+    --rosa-fundo: #fce4ec;
+    --rosa-escuro: #e91e63;
+    --marrom-doce: #8c6239;
+    --branco: #ffffff;
+    --sombra: rgba(0, 0, 0, 0.15);
+}
+
+/* --- GERAL --- */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: var(--rosa-fundo);
+    margin: 0;
+    color: #333;
+}
+
+header {
+    text-align: center;
+    padding: 30px 10px;
+}
+
+header h1 {
+    color: var(--rosa-escuro);
+    font-size: 2rem;
+    margin-bottom: 5px;
+    cursor: pointer; /* Para o modo Admin */
+}
+
+/* --- CARROSSEL DE CATEGORIAS --- */
+.categorias-container {
+    text-align: center;
+    padding: 20px 0;
+}
+
+.titulo-sessao {
+    font-style: italic;
+    color: var(--marrom-doce);
+    margin-bottom: 25px;
+}
+
+.carrossel-wrapper {
+    position: relative;
+    width: 90%;
+    max-width: 400px; /* Tamanho ideal para o card da foto */
+    margin: 0 auto;
+}
+
+.carrossel-scroll {
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory; /* Efeito de imã */
+    scroll-behavior: smooth;
+    gap: 0;
+    border-radius: 20px;
+    scrollbar-width: none; /* Esconde barra no Firefox */
+}
+
+.carrossel-scroll::-webkit-scrollbar {
+    display: none; /* Esconde barra no Chrome/Safari */
+}
+
+.card-categoria {
+    flex: 0 0 100%; /* Um card por vez */
+    height: 450px;
+    scroll-snap-align: center;
+    background-size: cover;
+    background-position: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding-bottom: 30px;
+}
+
+.info-card h3 {
+    color: var(--branco);
+    font-size: 1.5rem;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.7);
+    margin-bottom: 15px;
+}
+
+/* --- BOTÕES --- */
+.btn-filtro {
+    background-color: var(--marrom-doce);
+    color: var(--branco);
+    border: none;
+    padding: 10px 25px;
+    border-radius: 20px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.btn-filtro:active {
+    transform: scale(0.95);
+}
+
+/* --- SETAS --- */
+.seta {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background-color: var(--branco);
+    color: var(--rosa-escuro);
+    border: none;
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    font-size: 1.2rem;
+    box-shadow: 0 4px 10px var(--sombra);
+    z-index: 10;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.seta-esq { left: -20px; }
+.seta-dir { right: -20px; }
+
+/* --- VITRINE DE PRODUTOS --- */
+.container {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.categoria-vitrine {
+    margin-bottom: 40px;
+}
+
+.titulo-categoria {
+    color: var(--marrom-doce);
+    border-bottom: 2px solid var(--rosa-escuro);
+    display: inline-block;
+    margin-bottom: 20px;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 15px;
+}
+
+.card {
+    background: var(--branco);
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 4px 10px var(--sombra);
+    transition: 0.3s;
+}
+
+.card img {
+    width: 100%;
+    height: 150px;
+    object-fit: cover;
+}
+
+.btn-whats {
+    background-color: #25d366;
+    color: white;
+    border: none;
+    width: 100%;
+    padding: 10px;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+/* --- PAINEL ADMIN --- */
+#doceForm input, #doceForm select {
+    width: 100%;
+    padding: 12px;
+    margin: 8px 0;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-sizing: border-box;
+}
