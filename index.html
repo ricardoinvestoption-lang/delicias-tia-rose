@@ -7,6 +7,18 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
+
+    <!-- ========================================
+         BANNER DE AVISO - EDITE O TEXTO ABAIXO
+         Para mudar a mensagem, altere apenas o
+         texto entre as tags <span id="texto-aviso">
+         ======================================== -->
+    <div id="banner-aviso">
+        <span>📢</span>
+        <span id="texto-aviso">Faça suas encomendas até quinta-feira para o Dia das Mães! 🌸</span>
+        <button id="fechar-aviso" onclick="document.getElementById('banner-aviso').style.display='none'">✕</button>
+    </div>
+
     <header>
         <h1 id="titulo-principal">Delícias da Tia Rose</h1>
         <p>Doces feitos com amor</p>
@@ -22,6 +34,22 @@
 
             <!-- Container do Carrossel com ID para o JS -->
             <div class="carrossel-scroll" id="menuCarrossel">
+
+                <!-- ========================================
+                     CARD PROMOÇÃO - EDITE AQUI
+                     Para trocar a imagem: substitua a URL no url('...')
+                     Para trocar o título: edite o texto em <h3>
+                     Para trocar o botão: edite o texto em <button>
+                     ======================================== -->
+                <div class="card-categoria card-promocao" style="background-image: linear-gradient(to top, rgba(139,0,0,0.85), transparent), url('https://i.postimg.cc/7hfbrXLG/gelatinacolo.jpg');">
+                    <div class="info-card">
+                        <span class="badge-promocao">🔥 OFERTA ESPECIAL</span>
+                        <h3>PROMOÇÃO</h3>
+                        <p class="texto-promocao">Encomende até quinta-feira ! 🌸</p>
+                        <button class="btn-filtro" data-target="secao-promocoes">Ver Promoções</button>
+                    </div>
+                </div>
+
                 <div class="card-categoria" style="background-image: linear-gradient(to top, rgba(0,0,0,0.8), transparent), url('https://i.postimg.cc/7hfbrXLG/gelatinacolo.jpg');">
                     <div class="info-card">
                         <h3>DOCES</h3>
@@ -60,12 +88,24 @@
         <!-- ÁREA DE CADASTRO (ADMIN) -->
         <section id="admin-section" style="display: none; padding: 20px; background: #fff; border-radius: 15px; margin-bottom: 30px;">
             <h2>Painel de Controle - Tia Rose</h2>
+
+            <!-- EDIÇÃO DO BANNER -->
+            <div style="background:#fff0f5; border:1px solid #e91e63; border-radius:10px; padding:15px; margin-bottom:20px;">
+                <h3 style="margin:0 0 10px; color:#c2185b;">📢 Editar Banner de Aviso</h3>
+                <input type="text" id="textoBanner" placeholder="Digite a mensagem do banner..." style="width:100%; padding:12px; border:1px solid #ddd; border-radius:8px; box-sizing:border-box; font-size:1rem;">
+                <button onclick="salvarBanner()" style="margin-top:10px; background:#e91e63; color:white; padding:10px 20px; border:none; border-radius:8px; cursor:pointer; font-weight:bold;">💾 Salvar Banner</button>
+                <button onclick="document.getElementById('banner-aviso').style.display='none'" style="margin-top:10px; margin-left:10px; background:#aaa; color:white; padding:10px 20px; border:none; border-radius:8px; cursor:pointer;">🙈 Ocultar Banner</button>
+                <button onclick="document.getElementById('banner-aviso').style.display='flex'" style="margin-top:10px; margin-left:10px; background:#25d366; color:white; padding:10px 20px; border:none; border-radius:8px; cursor:pointer;">👁️ Mostrar Banner</button>
+            </div>
+
+            <!-- CADASTRO DE PRODUTO -->
             <form id="doceForm">
                 <input type="text" id="nome" placeholder="Nome do Produto" required>
                 <input type="number" id="preco" placeholder="Preço" step="0.01" required>
                 <input type="url" id="urlImagem" placeholder="Link da Imagem" required>
                 <select id="categoria" required>
                     <option value="" disabled selected>Selecione a Categoria</option>
+                    <option value="PROMOCAO">🔥 Promoção</option>
                     <option value="DOCES">Doces</option>
                     <option value="BALAS DE COCO">Balas de Coco</option>
                     <option value="OVOS DE PASCOA">Ovos de Páscoa</option>
@@ -77,6 +117,12 @@
         </section>
 
         <!-- VITRINES -->
+        <!-- PROMOÇÕES - APARECE PRIMEIRO -->
+        <div id="secao-promocoes" class="categoria-vitrine vitrine-promocao">
+            <h3 class="titulo-categoria titulo-promocao">🔥 Promoções da Semana</h3>
+            <div id="listaPromocoes" class="grid"></div>
+        </div>
+
         <div id="secao-salgados" class="categoria-vitrine">
             <h3 class="titulo-categoria">🥐 Salgados</h3>
             <div id="listaSalgados" class="grid"></div>
@@ -102,7 +148,7 @@
     <!-- FIREBASE CONFIG -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, collection, addDoc, onSnapshot, deleteDoc, doc, query, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, onSnapshot, deleteDoc, doc, query, orderBy, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyDz8gIhzGwn4oxTqVbg00ooaaGwneON0FA",
@@ -117,7 +163,7 @@
         const db = getFirestore(app);
 
         window.db = db;
-        window.dbMetodos = { collection, addDoc, onSnapshot, deleteDoc, doc, query, orderBy };
+        window.dbMetodos = { collection, addDoc, onSnapshot, deleteDoc, doc, query, orderBy, setDoc, getDoc };
     </script>
     <script src="script.js"></script>
 </body>

@@ -1,3 +1,60 @@
+/* --- BANNER DE AVISO (EDITÁVEL) --- */
+#banner-aviso {
+    background: linear-gradient(135deg, #e91e63, #c2185b);
+    color: white;
+    text-align: center;
+    padding: 12px 40px;
+    font-size: 1rem;
+    font-weight: bold;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+
+#fechar-aviso {
+    position: absolute;
+    right: 15px;
+    background: none;
+    border: none;
+    color: white;
+    font-size: 1.1rem;
+    cursor: pointer;
+    opacity: 0.8;
+    padding: 0 5px;
+}
+
+#fechar-aviso:hover {
+    opacity: 1;
+}
+
+/* --- CARD PROMOÇÃO --- */
+.card-promocao {
+    position: relative;
+    border: 3px solid #ffd700;
+    box-shadow: 0 0 20px rgba(255, 215, 0, 0.4);
+}
+
+.badge-promocao {
+    display: inline-block;
+    background: #ffd700;
+    color: #8c0000;
+    font-size: 0.8rem;
+    font-weight: bold;
+    padding: 4px 12px;
+    border-radius: 20px;
+    margin-bottom: 8px;
+}
+
+.texto-promocao {
+    color: white;
+    font-size: 0.9rem;
+    margin: 0 0 12px 0;
+    text-shadow: 1px 1px 3px rgba(0,0,0,0.8);
+}
+
 /* --- VARIÁVEIS DE CORES --- */
 :root {
     --rosa-fundo: #fce4ec;
@@ -117,6 +174,20 @@ header h1 {
 
 .seta-esq { left: -20px; }
 .seta-dir { right: -20px; }
+
+/* --- VITRINE DE PROMOÇÕES --- */
+.vitrine-promocao {
+    background: linear-gradient(135deg, #fff0f5, #ffe4ec);
+    border: 2px solid #e91e63;
+    border-radius: 15px;
+    padding: 20px;
+    margin-bottom: 40px;
+}
+
+.titulo-promocao {
+    color: #c2185b !important;
+    border-bottom-color: #ffd700 !important;
+}
 
 /* --- VITRINE DE PRODUTOS --- */
 .container {

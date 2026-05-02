@@ -14,7 +14,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     window.encomendar = (nome) => {
         const fone = "5516991839509"; 
-        const texto = encodeURIComponent(`Olá Tia Rose! Gostaria de encomendar: ${nome}`);
+        const texto = encodeURIComponent(`Olá Rose! Gostaria de encomendar: ${nome}`);
         window.open(`https://wa.me/${fone}?text=${texto}`, '_blank');
     };
 
@@ -22,9 +22,40 @@ document.addEventListener('DOMContentLoaded', () => {
     setTimeout(() => {
         if (!window.dbMetodos) return;
 
-        const { collection, addDoc, onSnapshot, deleteDoc, doc, query, orderBy } = window.dbMetodos;
+        const { collection, addDoc, onSnapshot, deleteDoc, doc, query, orderBy, setDoc, getDoc } = window.dbMetodos;
         const db = window.db;
         const produtosRef = collection(db, "produtos_v2");
+
+        // --- CARREGAR BANNER DO FIREBASE AO INICIAR ---
+        async function carregarBanner() {
+            try {
+                const bannerDoc = await getDoc(doc(db, "configuracoes", "banner"));
+                if (bannerDoc.exists()) {
+                    const dados = bannerDoc.data();
+                    const spanAviso = document.getElementById('texto-aviso');
+                    const inputBanner = document.getElementById('textoBanner');
+                    const bannerDiv = document.getElementById('banner-aviso');
+                    if (spanAviso && dados.texto) spanAviso.textContent = dados.texto;
+                    if (inputBanner && dados.texto) inputBanner.value = dados.texto;
+                    if (bannerDiv) bannerDiv.style.display = dados.visivel === false ? 'none' : 'flex';
+                }
+            } catch (e) {}
+        }
+        carregarBanner();
+
+        // --- SALVAR BANNER NO FIREBASE ---
+        window.salvarBanner = async function() {
+            const texto = document.getElementById('textoBanner').value.trim();
+            if (!texto) { alert("Digite uma mensagem para o banner!"); return; }
+            try {
+                await setDoc(doc(db, "configuracoes", "banner"), { texto, visivel: true });
+                document.getElementById('texto-aviso').textContent = texto;
+                document.getElementById('banner-aviso').style.display = 'flex';
+                alert("✅ Banner atualizado com sucesso!");
+            } catch (e) {
+                alert("Erro ao salvar banner. Verifique a conexão.");
+            }
+        };
 
         const doceForm = document.getElementById('doceForm');
         const adminSection = document.getElementById('admin-section');
@@ -65,6 +96,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // --- CARREGAR VITRINE ---
         function inicializarVitrine() {
             const listas = {
+                'PROMOCAO': 'listaPromocoes',
                 'SALGADOS': 'listaSalgados',
                 'BOLOS': 'listaBolos',
                 'DOCES': 'listaDoces',
@@ -95,8 +127,13 @@ document.addEventListener('DOMContentLoaded', () => {
                         const btnExcluir = estaNoModoAdmin ? 
                             `<button class="btn-remover" onclick="excluirProduto('${id}')" style="position: absolute; top: 5px; right: 5px; background: red; color: white; border: none; border-radius: 50%; width: 25px; height: 25px; cursor: pointer; z-index: 10;">×</button>` : '';
 
+                        // Badge especial para promoções
+                        const badgePromocao = p.categoria === 'PROMOCAO' ? 
+                            `<div style="background:#e91e63;color:white;font-size:0.75rem;font-weight:bold;padding:4px 10px;text-align:center;">🔥 PROMOÇÃO</div>` : '';
+
                         card.innerHTML = `
                             ${btnExcluir}
+                            ${badgePromocao}
                             <img src="${p.urlImagem}" alt="${p.nome}" onerror="this.src='https://via.placeholder.com/300x200?text=Imagem+nao+encontrada'">
                             <div style="padding:15px">
                                 <h3 style="margin:0; font-size:1.1rem">${p.nome}</h3>
@@ -107,6 +144,10 @@ document.addEventListener('DOMContentLoaded', () => {
                         container.appendChild(card);
                     }
                 });
+
+                // Promoções sempre visível
+                const secaoPromocoes = document.getElementById('secao-promocoes');
+                if (secaoPromocoes) secaoPromocoes.style.display = 'block';
             });
         }
 
