@@ -1,10 +1,12 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // 1. FUNÇÕES GLOBAIS (Devem estar disponíveis para o HTML)
-    // Isso resolve o problema das setas "travadas"
+    // 1. FUNÇÕES GLOBAIS
     window.scrollMenu = function(direcao) {
         const carrossel = document.getElementById('menuCarrossel');
         if (carrossel) {
-            const larguraCard = carrossel.offsetWidth;
+            // Largura de um card = largura visível do scroll (sem padding)
+            const larguraCard = carrossel.firstElementChild
+                ? carrossel.firstElementChild.offsetWidth + 12 // 12 = gap
+                : carrossel.offsetWidth;
             carrossel.scrollBy({
                 left: direcao * larguraCard,
                 behavior: 'smooth'
@@ -13,12 +15,83 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     window.encomendar = (nome) => {
-        const fone = "5516991839509"; 
+        const fone = "5516991839509";
         const texto = encodeURIComponent(`Olá Rose! Gostaria de encomendar: ${nome}`);
         window.open(`https://wa.me/${fone}?text=${texto}`, '_blank');
     };
 
-    // 2. LÓGICA DO FIREBASE (Aguarda o carregamento dos módulos)
+    // --- INDICADORES DE PÁGINA (BOLINHAS) ---
+    function inicializarIndicadores() {
+        const carrossel = document.getElementById('menuCarrossel');
+        const container = document.getElementById('indicadoresCarrossel');
+        if (!carrossel || !container) return;
+
+        const cards = carrossel.querySelectorAll('.card-categoria');
+        container.innerHTML = '';
+        cards.forEach((_, i) => {
+            const dot = document.createElement('div');
+            dot.className = 'indicador' + (i === 0 ? ' ativo' : '');
+            container.appendChild(dot);
+        });
+
+        carrossel.addEventListener('scroll', () => {
+            const larguraCard = cards[0]
+                ? cards[0].offsetWidth + 12
+                : carrossel.offsetWidth;
+            const index = Math.round(carrossel.scrollLeft / larguraCard);
+            container.querySelectorAll('.indicador').forEach((dot, i) => {
+                dot.classList.toggle('ativo', i === index);
+            });
+        });
+    }
+
+    // --- SWIPE (TOUCH) NO CARROSSEL ---
+    function inicializarSwipe() {
+        const carrossel = document.getElementById('menuCarrossel');
+        if (!carrossel) return;
+
+        let startX = 0;
+        carrossel.addEventListener('touchstart', e => {
+            startX = e.touches[0].clientX;
+        }, { passive: true });
+
+        carrossel.addEventListener('touchend', e => {
+            const diff = startX - e.changedTouches[0].clientX;
+            // Só dispara se o movimento for pequeno (tap, não scroll)
+            // O scroll nativo já cuida do swipe; isso é só para garantir o snap
+        }, { passive: true });
+    }
+
+    inicializarIndicadores();
+    inicializarSwipe();
+
+    // --- BOTÕES "SAIBA MAIS" — TOGGLE DA VITRINE ---
+    document.querySelectorAll('.btn-filtro').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const targetId = btn.getAttribute('data-target');
+            const elemento = document.getElementById(targetId);
+            if (!elemento) return;
+
+            const jaAberto = elemento.classList.contains('visivel');
+
+            if (jaAberto) {
+                // Fecha a seção
+                elemento.classList.remove('visivel');
+                elemento.style.display = 'none';
+            } else {
+                // Abre a seção e rola até ela
+                elemento.classList.add('visivel');
+                setTimeout(() => {
+                    window.scrollTo({
+                        top: elemento.offsetTop - 20,
+                        behavior: 'smooth'
+                    });
+                }, 50);
+            }
+        });
+    });
+
+    // 2. LÓGICA DO FIREBASE
     setTimeout(() => {
         if (!window.dbMetodos) return;
 
@@ -26,7 +99,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const db = window.db;
         const produtosRef = collection(db, "produtos_v2");
 
-        // --- CARREGAR BANNER DO FIREBASE AO INICIAR ---
+        // --- CARREGAR BANNER DO FIREBASE ---
         async function carregarBanner() {
             try {
                 const bannerDoc = await getDoc(doc(db, "configuracoes", "banner"));
@@ -43,7 +116,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         carregarBanner();
 
-        // --- SALVAR BANNER NO FIREBASE ---
+        // --- SALVAR BANNER ---
         window.salvarBanner = async function() {
             const texto = document.getElementById('textoBanner').value.trim();
             if (!texto) { alert("Digite uma mensagem para o banner!"); return; }
@@ -67,26 +140,12 @@ document.addEventListener('DOMContentLoaded', () => {
             if (cliques === 3) {
                 adminSection.style.display = 'block';
                 alert("Modo Administrativo Ativado!");
-                inicializarVitrine(); 
+                inicializarVitrine();
                 cliques = 0;
             }
         });
 
-        // --- BOTÕES "SAIBA MAIS" (SCROLL PARA AS VITRINES) ---
-        document.querySelectorAll('.btn-filtro').forEach(btn => {
-            btn.addEventListener('click', () => {
-                const targetId = btn.getAttribute('data-target');
-                const elemento = document.getElementById(targetId);
-                if (elemento) {
-                    window.scrollTo({
-                        top: elemento.offsetTop - 20,
-                        behavior: 'smooth'
-                    });
-                }
-            });
-        });
-
-        // --- EXCLUIR PRODUTO (Global para o Firebase) ---
+        // --- EXCLUIR PRODUTO ---
         window.excluirProduto = async (id) => {
             if (confirm("Deseja remover este produto da nuvem?")) {
                 await deleteDoc(doc(db, "produtos_v2", id));
@@ -124,11 +183,10 @@ document.addEventListener('DOMContentLoaded', () => {
                         card.style.position = 'relative';
 
                         const estaNoModoAdmin = adminSection.style.display === 'block';
-                        const btnExcluir = estaNoModoAdmin ? 
+                        const btnExcluir = estaNoModoAdmin ?
                             `<button class="btn-remover" onclick="excluirProduto('${id}')" style="position: absolute; top: 5px; right: 5px; background: red; color: white; border: none; border-radius: 50%; width: 25px; height: 25px; cursor: pointer; z-index: 10;">×</button>` : '';
 
-                        // Badge especial para promoções
-                        const badgePromocao = p.categoria === 'PROMOCAO' ? 
+                        const badgePromocao = p.categoria === 'PROMOCAO' ?
                             `<div style="background:#e91e63;color:white;font-size:0.75rem;font-weight:bold;padding:4px 10px;text-align:center;">🔥 PROMOÇÃO</div>` : '';
 
                         card.innerHTML = `
@@ -147,7 +205,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 // Promoções sempre visível
                 const secaoPromocoes = document.getElementById('secao-promocoes');
-                if (secaoPromocoes) secaoPromocoes.style.display = 'block';
+                if (secaoPromocoes) {
+                    secaoPromocoes.style.display = 'block';
+                    secaoPromocoes.classList.add('visivel');
+                }
             });
         }
 

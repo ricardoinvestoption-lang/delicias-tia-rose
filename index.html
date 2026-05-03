@@ -8,11 +8,7 @@
 </head>
 <body>
 
-    <!-- ========================================
-         BANNER DE AVISO - EDITE O TEXTO ABAIXO
-         Para mudar a mensagem, altere apenas o
-         texto entre as tags <span id="texto-aviso">
-         ======================================== -->
+    <!-- BANNER DE AVISO -->
     <div id="banner-aviso">
         <span>📢</span>
         <span id="texto-aviso">Faça suas encomendas até quinta-feira para o Dia das Mães! 🌸</span>
@@ -28,19 +24,13 @@
         <h2 class="titulo-sessao">Conheça todos os nossos sabores</h2>
         
         <div class="carrossel-wrapper">
-            <!-- Botões de Navegação -->
+            <!-- Setas de Navegação -->
             <button class="seta seta-esq" onclick="scrollMenu(-1)">&#10094;</button>
             <button class="seta seta-dir" onclick="scrollMenu(1)">&#10095;</button>
 
-            <!-- Container do Carrossel com ID para o JS -->
+            <!-- Carrossel -->
             <div class="carrossel-scroll" id="menuCarrossel">
 
-                <!-- ========================================
-                     CARD PROMOÇÃO - EDITE AQUI
-                     Para trocar a imagem: substitua a URL no url('...')
-                     Para trocar o título: edite o texto em <h3>
-                     Para trocar o botão: edite o texto em <button>
-                     ======================================== -->
                 <div class="card-categoria card-promocao" style="background-image: linear-gradient(to top, rgba(139,0,0,0.85), transparent), url('https://i.postimg.cc/BQ6V4W0M/promo.jpg');">
                     <div class="info-card">
                         <span class="badge-promocao">🔥 OFERTA ESPECIAL</span>
@@ -56,32 +46,45 @@
                         <button class="btn-filtro" data-target="secao-doces">Saiba mais</button>
                     </div>
                 </div>
+
                 <div class="card-categoria" style="background-image: linear-gradient(to top, rgba(0,0,0,0.8), transparent), url('https://i.postimg.cc/hvZm065h/balas.png');">
                     <div class="info-card">
                         <h3>BALAS DE COCO</h3>
                         <button class="btn-filtro" data-target="secao-balas">Saiba mais</button>
                     </div>
                 </div>
+
                 <div class="card-categoria" style="background-image: linear-gradient(to top, rgba(0,0,0,0.8), transparent), url('https://i.postimg.cc/VvhStMJq/Ovos.png');">
                     <div class="info-card">
                         <h3>OVOS DE PÁSCOA</h3>
                         <button class="btn-filtro" data-target="secao-ovos">Saiba mais</button>
                     </div>
                 </div>
+
                 <div class="card-categoria" style="background-image: linear-gradient(to top, rgba(0,0,0,0.8), transparent), url('https://i.postimg.cc/HxSjNFTT/bolocapa.jpg');">
                     <div class="info-card">
                         <h3>BOLOS</h3>
                         <button class="btn-filtro" data-target="secao-bolos">Saiba mais</button>
                     </div>
                 </div>
+
                 <div class="card-categoria" style="background-image: linear-gradient(to top, rgba(0,0,0,0.8), transparent), url('https://i.postimg.cc/GhZ8hF0F/salgados.jpg');">
                     <div class="info-card">
                         <h3>SALGADOS</h3>
                         <button class="btn-filtro" data-target="secao-salgados">Saiba mais</button>
                     </div>
                 </div>
-            </div>
-        </div>
+
+            </div><!-- fim carrossel-scroll -->
+
+            <!-- Bolinhas indicadoras de página -->
+            <div class="carrossel-indicadores" id="indicadoresCarrossel"></div>
+
+        </div><!-- fim carrossel-wrapper -->
+
+        <!-- Dica de navegação -->
+        <p class="hint-deslize">👆 Deslize ou use as setas para ver mais categorias</p>
+
     </section>
 
     <main class="container">
@@ -116,8 +119,7 @@
             </form>
         </section>
 
-        <!-- VITRINES -->
-        <!-- PROMOÇÕES - APARECE PRIMEIRO -->
+        <!-- VITRINES — ocultas por padrão, reveladas ao clicar em "Saiba mais" -->
         <div id="secao-promocoes" class="categoria-vitrine vitrine-promocao">
             <h3 class="titulo-categoria titulo-promocao">🔥 Promoções da Semana</h3>
             <div id="listaPromocoes" class="grid"></div>
@@ -127,18 +129,22 @@
             <h3 class="titulo-categoria">🥐 Salgados</h3>
             <div id="listaSalgados" class="grid"></div>
         </div>
+
         <div id="secao-bolos" class="categoria-vitrine">
             <h3 class="titulo-categoria">🍰 Bolos</h3>
             <div id="listaBolos" class="grid"></div>
         </div>
+
         <div id="secao-doces" class="categoria-vitrine">
             <h3 class="titulo-categoria">🍬 Doces</h3>
             <div id="listaDoces" class="grid"></div>
         </div>
+
         <div id="secao-balas" class="categoria-vitrine">
             <h3 class="titulo-categoria">🥥 Balas de Coco</h3>
             <div id="listaBalas" class="grid"></div>
         </div>
+
         <div id="secao-ovos" class="categoria-vitrine">
             <h3 class="titulo-categoria">🍫 Ovos de Páscoa</h3>
             <div id="listaOvos" class="grid"></div>
