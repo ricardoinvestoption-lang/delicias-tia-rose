@@ -72,14 +72,23 @@ document.addEventListener('DOMContentLoaded', () => {
             const elemento = document.getElementById(targetId);
             if (!elemento) return;
 
+            // Promoções ficam sempre visíveis — só rola até elas
+            if (targetId === 'secao-promocoes') {
+                setTimeout(() => {
+                    window.scrollTo({
+                        top: elemento.offsetTop - 20,
+                        behavior: 'smooth'
+                    });
+                }, 50);
+                return;
+            }
+
             const jaAberto = elemento.classList.contains('visivel');
 
             if (jaAberto) {
-                // Fecha a seção
                 elemento.classList.remove('visivel');
                 elemento.style.display = 'none';
             } else {
-                // Abre a seção e rola até ela
                 elemento.classList.add('visivel');
                 setTimeout(() => {
                     window.scrollTo({

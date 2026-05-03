@@ -1,108 +1,195 @@
-/* --- BANNER DE AVISO (EDITÁVEL) --- */
+/* --- GOOGLE FONTS --- */
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,500&family=Lato:wght@300;400;700&display=swap');
+
+/* --- VARIÁVEIS DE CORES --- */
+:root {
+    --rosa-fundo: #fff5f8;
+    --rosa-escuro: #d63870;
+    --rosa-medio: #e91e63;
+    --rosa-claro: #fce4ec;
+    --marrom-doce: #7a4f2e;
+    --marrom-claro: #c49a6c;
+    --branco: #ffffff;
+    --sombra: rgba(214, 56, 112, 0.12);
+    --texto: #3a2a2a;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+body {
+    font-family: 'Lato', sans-serif;
+    background-color: var(--rosa-fundo);
+    background-image:
+        radial-gradient(circle at 15% 20%, rgba(233,30,99,0.06) 0%, transparent 50%),
+        radial-gradient(circle at 85% 60%, rgba(214,56,112,0.05) 0%, transparent 50%),
+        url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23e91e63' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    margin: 0;
+    color: var(--texto);
+}
+
+/* --- BANNER --- */
 #banner-aviso {
-    background: linear-gradient(135deg, #e91e63, #c2185b);
+    background: linear-gradient(90deg, #c2185b, #e91e63, #c2185b);
+    background-size: 200% 100%;
+    animation: bannerSlide 5s linear infinite;
     color: white;
     text-align: center;
-    padding: 12px 40px;
-    font-size: 1rem;
-    font-weight: bold;
+    padding: 11px 50px;
+    font-size: 0.9rem;
+    font-family: 'Lato', sans-serif;
+    font-weight: 700;
+    letter-spacing: 0.05em;
     position: relative;
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 10px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    box-shadow: 0 2px 14px rgba(194,24,91,0.35);
+}
+
+@keyframes bannerSlide {
+    0%   { background-position: 0% 50%; }
+    100% { background-position: 200% 50%; }
 }
 
 #fechar-aviso {
     position: absolute;
-    right: 15px;
-    background: none;
+    right: 16px;
+    background: rgba(255,255,255,0.2);
     border: none;
     color: white;
-    font-size: 1.1rem;
+    font-size: 0.85rem;
     cursor: pointer;
-    opacity: 0.8;
-    padding: 0 5px;
+    width: 26px; height: 26px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s;
 }
+#fechar-aviso:hover { background: rgba(255,255,255,0.35); }
 
-#fechar-aviso:hover {
-    opacity: 1;
-}
-
-/* --- CARD PROMOÇÃO --- */
-.card-promocao {
-    position: relative;
-    border: 3px solid #ffd700;
-    box-shadow: 0 0 20px rgba(255, 215, 0, 0.4);
-}
-
-.badge-promocao {
-    display: inline-block;
-    background: #ffd700;
-    color: #8c0000;
-    font-size: 0.8rem;
-    font-weight: bold;
-    padding: 4px 12px;
-    border-radius: 20px;
-    margin-bottom: 8px;
-}
-
-.texto-promocao {
-    color: white;
-    font-size: 0.9rem;
-    margin: 0 0 12px 0;
-    text-shadow: 1px 1px 3px rgba(0,0,0,0.8);
-}
-
-/* --- VARIÁVEIS DE CORES --- */
-:root {
-    --rosa-fundo: #fce4ec;
-    --rosa-escuro: #e91e63;
-    --marrom-doce: #8c6239;
-    --branco: #ffffff;
-    --sombra: rgba(0, 0, 0, 0.15);
-}
-
-/* --- GERAL --- */
-body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background-color: var(--rosa-fundo);
-    margin: 0;
-    color: #333;
-}
-
+/* --- HEADER --- */
 header {
     text-align: center;
-    padding: 30px 10px;
+    padding: 50px 20px 28px;
+    position: relative;
+    overflow: hidden;
+}
+
+header::before {
+    content: '';
+    position: absolute;
+    top: -80px; left: 50%;
+    transform: translateX(-50%);
+    width: 600px; height: 500px;
+    background: radial-gradient(circle, rgba(233,30,99,0.07) 0%, transparent 70%);
+    pointer-events: none;
+}
+
+.header-icon {
+    font-size: 3rem;
+    display: block;
+    margin-bottom: 12px;
+    animation: floatIcon 3.5s ease-in-out infinite;
+}
+
+@keyframes floatIcon {
+    0%, 100% { transform: translateY(0); }
+    50%       { transform: translateY(-7px); }
 }
 
 header h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.7rem;
+    font-weight: 700;
     color: var(--rosa-escuro);
-    font-size: 2rem;
-    margin-bottom: 5px;
+    margin: 0 0 6px;
     cursor: pointer;
+    line-height: 1.15;
+    text-shadow: 0 2px 24px rgba(214,56,112,0.18);
+    animation: fadeSlideDown 0.7s ease both;
 }
 
-/* --- CARROSSEL DE CATEGORIAS --- */
+.header-subtitulo {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-size: 1.05rem;
+    color: var(--marrom-claro);
+    margin: 0 0 20px;
+    animation: fadeSlideDown 0.7s 0.15s ease both;
+    opacity: 0;
+    animation-fill-mode: forwards;
+}
+
+.header-linha {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    animation: fadeSlideDown 0.7s 0.3s ease both;
+    opacity: 0;
+    animation-fill-mode: forwards;
+}
+
+.header-linha::before,
+.header-linha::after {
+    content: '';
+    width: 55px; height: 1px;
+    background: linear-gradient(to right, transparent, var(--marrom-claro));
+}
+.header-linha::after {
+    background: linear-gradient(to left, transparent, var(--marrom-claro));
+}
+
+.header-badge {
+    background: linear-gradient(135deg, var(--rosa-escuro), #ff6090);
+    color: white;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 5px 18px;
+    border-radius: 20px;
+    box-shadow: 0 4px 16px rgba(214,56,112,0.3);
+}
+
+@keyframes fadeSlideDown {
+    from { opacity: 0; transform: translateY(-14px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+/* --- SEÇÃO CATEGORIAS --- */
 .categorias-container {
     text-align: center;
-    padding: 20px 0;
+    padding: 10px 0 30px;
 }
 
 .titulo-sessao {
+    font-family: 'Playfair Display', serif;
     font-style: italic;
+    font-size: 1.2rem;
     color: var(--marrom-doce);
-    margin-bottom: 25px;
+    margin-bottom: 28px;
+    display: inline-block;
+    position: relative;
 }
 
+.titulo-sessao::after {
+    content: '';
+    display: block;
+    width: 36px; height: 2px;
+    background: var(--rosa-medio);
+    margin: 8px auto 0;
+    border-radius: 2px;
+}
+
+/* --- CARROSSEL --- */
 .carrossel-wrapper {
     position: relative;
-    /* Mostra ~80% do card atual + espiar ~10% do próximo em cada lado */
     width: 82%;
     max-width: 420px;
     margin: 0 auto;
-    /* Permite que as setas "vazem" para fora sem cortar */
     overflow: visible;
 }
 
@@ -111,21 +198,16 @@ header h1 {
     overflow-x: auto;
     scroll-snap-type: x mandatory;
     scroll-behavior: smooth;
-    gap: 12px;           /* Espaço entre cards — revela a borda do próximo */
+    gap: 12px;
     border-radius: 20px;
     scrollbar-width: none;
-    /* padding lateral: deixa o próximo card visível ~10% */
     padding: 0 10%;
     scroll-padding: 0 10%;
     box-sizing: border-box;
 }
-
-.carrossel-scroll::-webkit-scrollbar {
-    display: none;
-}
+.carrossel-scroll::-webkit-scrollbar { display: none; }
 
 .card-categoria {
-    /* Ocupa 100% da área visível (descontando o padding) */
     flex: 0 0 100%;
     height: 400px;
     scroll-snap-align: center;
@@ -134,116 +216,126 @@ header h1 {
     display: flex;
     flex-direction: column;
     justify-content: flex-end;
-    padding-bottom: 25px;
-    border-radius: 16px;
-    box-shadow: 0 6px 20px rgba(0,0,0,0.25);
-    transition: transform 0.2s;
+    padding-bottom: 28px;
+    border-radius: 20px;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.28);
+    overflow: hidden;
 }
 
-.info-card {
-    padding: 0 20px;
-}
+.info-card { padding: 0 22px; }
 
 .info-card h3 {
+    font-family: 'Playfair Display', serif;
     color: var(--branco);
-    font-size: 1.5rem;
-    text-shadow: 2px 2px 4px rgba(0,0,0,0.7);
-    margin-bottom: 15px;
+    font-size: 1.65rem;
+    font-weight: 700;
+    text-shadow: 0 2px 10px rgba(0,0,0,0.65);
+    margin-bottom: 14px;
+    letter-spacing: 0.02em;
 }
 
-/* --- INDICADOR DE PÁGINA (BOLINHAS) --- */
+.card-promocao {
+    border: 3px solid #ffd700;
+    box-shadow: 0 0 30px rgba(255,215,0,0.3), 0 8px 30px rgba(0,0,0,0.28);
+}
+
+.badge-promocao {
+    display: inline-block;
+    background: linear-gradient(135deg, #ffd700, #ffb300);
+    color: #6d1a00;
+    font-size: 0.74rem;
+    font-weight: 900;
+    padding: 5px 14px;
+    border-radius: 20px;
+    margin-bottom: 10px;
+    letter-spacing: 0.06em;
+    box-shadow: 0 2px 8px rgba(255,179,0,0.4);
+}
+
+.texto-promocao {
+    color: rgba(255,255,255,0.92);
+    font-size: 0.87rem;
+    margin: 0 0 14px;
+    text-shadow: 1px 1px 4px rgba(0,0,0,0.7);
+    font-style: italic;
+}
+
+/* --- INDICADORES --- */
 .carrossel-indicadores {
     display: flex;
     justify-content: center;
     gap: 8px;
-    margin-top: 14px;
+    margin-top: 16px;
 }
 
 .indicador {
-    width: 8px;
-    height: 8px;
+    width: 7px; height: 7px;
     border-radius: 50%;
-    background: #ccc;
-    transition: background 0.3s, transform 0.3s;
+    background: #ddb8c8;
+    transition: background 0.3s, width 0.3s, border-radius 0.3s;
 }
 
 .indicador.ativo {
     background: var(--rosa-escuro);
-    transform: scale(1.3);
+    width: 20px;
+    border-radius: 4px;
+}
+
+/* --- HINT --- */
+.hint-deslize {
+    text-align: center;
+    font-size: 0.77rem;
+    color: #c2849a;
+    margin-top: 10px;
+    letter-spacing: 0.03em;
 }
 
 /* --- BOTÕES --- */
 .btn-filtro {
-    background-color: var(--marrom-doce);
+    background: linear-gradient(135deg, var(--marrom-doce), var(--marrom-claro));
     color: var(--branco);
     border: none;
-    padding: 10px 25px;
-    border-radius: 20px;
-    font-weight: bold;
+    padding: 11px 28px;
+    border-radius: 25px;
+    font-family: 'Lato', sans-serif;
+    font-weight: 700;
+    font-size: 0.87rem;
+    letter-spacing: 0.05em;
     cursor: pointer;
-    transition: transform 0.2s;
+    box-shadow: 0 4px 14px rgba(122,79,46,0.3);
+    transition: transform 0.2s, box-shadow 0.2s;
 }
-
 .btn-filtro:active {
     transform: scale(0.95);
+    box-shadow: 0 2px 8px rgba(122,79,46,0.2);
 }
 
-/* --- SETAS — REDESENHADAS PARA DESTAQUE --- */
+/* --- SETAS --- */
 .seta {
     position: absolute;
     top: 50%;
-    transform: translateY(-60%); /* sobe um pouco por causa do indicador */
+    transform: translateY(-60%);
     background: var(--rosa-escuro);
     color: white;
     border: none;
-    width: 42px;
-    height: 42px;
+    width: 42px; height: 42px;
     border-radius: 50%;
-    font-size: 1.1rem;
+    font-size: 1rem;
     font-weight: bold;
-    box-shadow: 0 4px 14px rgba(233, 30, 99, 0.5);
+    box-shadow: 0 4px 16px rgba(214,56,112,0.45);
     z-index: 10;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: transform 0.15s, box-shadow 0.15s;
+    transition: background 0.2s, transform 0.15s;
 }
-
-.seta:active {
-    transform: translateY(-60%) scale(0.92);
-    box-shadow: 0 2px 8px rgba(233, 30, 99, 0.4);
-}
-
-/* Posicionadas fora do carrossel, sobre o espaço livre */
+.seta:hover { background: var(--marrom-doce); }
+.seta:active { transform: translateY(-60%) scale(0.9); }
 .seta-esq { left: -22px; }
 .seta-dir { right: -22px; }
 
-/* --- HINT "DESLIZE" --- */
-.hint-deslize {
-    text-align: center;
-    font-size: 0.78rem;
-    color: #b06080;
-    margin-top: 6px;
-    letter-spacing: 0.03em;
-    opacity: 0.85;
-}
-
-/* --- VITRINE DE PROMOÇÕES --- */
-.vitrine-promocao {
-    background: linear-gradient(135deg, #fff0f5, #ffe4ec);
-    border: 2px solid #e91e63;
-    border-radius: 15px;
-    padding: 20px;
-    margin-bottom: 40px;
-}
-
-.titulo-promocao {
-    color: #c2185b !important;
-    border-bottom-color: #ffd700 !important;
-}
-
-/* --- VITRINE DE PRODUTOS --- */
+/* --- VITRINE --- */
 .container {
     max-width: 1000px;
     margin: 0 auto;
@@ -252,34 +344,51 @@ header h1 {
 
 .categoria-vitrine {
     margin-bottom: 40px;
-    /* Ocultas por padrão — JS revela ao clicar em "Saiba mais" */
     display: none;
 }
 
-/* Promoções ficam visíveis por padrão */
-#secao-promocoes {
-    display: block;
+#secao-promocoes { display: block; }
+
+.vitrine-promocao {
+    background: linear-gradient(135deg, #fff8fb, #ffe8f0);
+    border: 2px solid rgba(233,30,99,0.2);
+    border-radius: 20px;
+    padding: 24px;
+    margin-bottom: 40px;
+    box-shadow: 0 4px 24px rgba(233,30,99,0.07);
+}
+
+.titulo-promocao {
+    color: #c2185b !important;
+    border-bottom-color: #ffd700 !important;
 }
 
 .titulo-categoria {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.3rem;
     color: var(--marrom-doce);
-    border-bottom: 2px solid var(--rosa-escuro);
+    border-bottom: 2px solid var(--rosa-medio);
     display: inline-block;
+    padding-bottom: 4px;
     margin-bottom: 20px;
 }
 
 .grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-    gap: 15px;
+    gap: 16px;
 }
 
 .card {
     background: var(--branco);
-    border-radius: 15px;
+    border-radius: 16px;
     overflow: hidden;
-    box-shadow: 0 4px 10px var(--sombra);
-    transition: 0.3s;
+    box-shadow: 0 4px 16px var(--sombra);
+    transition: transform 0.25s, box-shadow 0.25s;
+}
+.card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 28px rgba(214,56,112,0.18);
 }
 
 .card img {
@@ -289,33 +398,57 @@ header h1 {
 }
 
 .btn-whats {
-    background-color: #25d366;
+    background: linear-gradient(135deg, #25d366, #1db954);
     color: white;
     border: none;
     width: 100%;
-    padding: 10px;
+    padding: 11px;
     border-radius: 8px;
-    font-weight: bold;
+    font-family: 'Lato', sans-serif;
+    font-weight: 700;
+    font-size: 0.87rem;
     cursor: pointer;
+    letter-spacing: 0.02em;
+    transition: opacity 0.2s;
 }
+.btn-whats:active { opacity: 0.85; }
 
 /* --- PAINEL ADMIN --- */
 #doceForm input, #doceForm select {
     width: 100%;
     padding: 12px;
     margin: 8px 0;
-    border: 1px solid #ddd;
-    border-radius: 8px;
+    border: 1px solid #e8d0d8;
+    border-radius: 10px;
+    font-family: 'Lato', sans-serif;
+    font-size: 0.95rem;
+    background: #fff9fb;
     box-sizing: border-box;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+#doceForm input:focus, #doceForm select:focus {
+    outline: none;
+    border-color: var(--rosa-medio);
+    box-shadow: 0 0 0 3px rgba(233,30,99,0.1);
 }
 
-/* --- ANIMAÇÃO DE ENTRADA DA VITRINE --- */
+/* --- ANIMAÇÃO VITRINE --- */
 @keyframes fadeInDown {
-    from { opacity: 0; transform: translateY(-16px); }
+    from { opacity: 0; transform: translateY(-14px); }
     to   { opacity: 1; transform: translateY(0); }
 }
-
 .categoria-vitrine.visivel {
     display: block;
     animation: fadeInDown 0.35s ease;
+}
+
+/* --- FOOTER --- */
+footer {
+    text-align: center;
+    padding: 28px 20px;
+    color: #c2849a;
+    font-size: 0.82rem;
+    font-style: italic;
+    border-top: 1px solid rgba(233,30,99,0.1);
+    margin-top: 10px;
 }
