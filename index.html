@@ -8,6 +8,23 @@
 </head>
 <body>
 
+    <!-- MODAL DE PEDIDO CUSTOMIZADO -->
+    <div id="modal-pedido">
+        <div id="modal-pedido-box">
+            <div id="modal-pedido-header">
+                <span>🛍️ Fazer Pedido</span>
+            </div>
+            <div id="modal-pedido-body">
+                <p id="modal-nome-produto"></p>
+                <input type="text" id="modal-input-nome" placeholder="Seu nome completo..." autocomplete="name" />
+                <div id="modal-botoes">
+                    <button id="modal-btn-cancelar" onclick="fecharModalPedido()">Cancelar</button>
+                    <button id="modal-btn-confirmar" onclick="confirmarPedido()">Pedir no WhatsApp ✅</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- BANNER DE AVISO -->
     <div id="banner-aviso">
         <span>📢</span>
@@ -31,7 +48,7 @@
             <!-- Carrossel -->
             <div class="carrossel-scroll" id="menuCarrossel">
 
-                <div class="card-categoria card-promocao" style="background-image: linear-gradient(to top, rgba(139,0,0,0.85), transparent), url('https://i.postimg.cc/k52TNS2B/Felizdiasdasmaes.jpg');">
+                <div class="card-categoria card-promocao" style="background-image: linear-gradient(to top, rgba(139,0,0,0.85), transparent), url('https://i.postimg.cc/BQ6V4W0M/promo.jpg');">
                     <div class="info-card">
                         <span class="badge-promocao">🔥 OFERTA ESPECIAL</span>
                         <h3>PROMOÇÃO</h3>

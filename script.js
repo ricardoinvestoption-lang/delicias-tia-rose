@@ -14,31 +14,51 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    window.encomendar = async (nomeProduto, preco) => {
-        const nomeCliente = prompt("Para organizar seu pedido, qual seu nome?");
-        if (!nomeCliente) return;
+    // Armazena produto atual enquanto o modal está aberto
+    let _pedidoProduto = '';
+    let _pedidoPreco = '';
+
+    // Abre o modal bonito no lugar do prompt() nativo
+    window.encomendar = (nomeProduto, preco) => {
+        _pedidoProduto = nomeProduto;
+        _pedidoPreco = preco;
+        document.getElementById('modal-nome-produto').textContent = `Produto: ${nomeProduto}`;
+        document.getElementById('modal-input-nome').value = '';
+        document.getElementById('modal-pedido').style.display = 'flex';
+        setTimeout(() => document.getElementById('modal-input-nome').focus(), 100);
+    };
+
+    window.fecharModalPedido = () => {
+        document.getElementById('modal-pedido').style.display = 'none';
+    };
+
+    // Chamada DIRETAMENTE pelo clique do botão no modal — sem await antes do open
+    window.confirmarPedido = () => {
+        const nomeCliente = document.getElementById('modal-input-nome').value.trim();
+        if (!nomeCliente) {
+            document.getElementById('modal-input-nome').style.border = '2px solid #e91e63';
+            return;
+        }
 
         const fone = "5516991839509";
-        const { collection, addDoc, serverTimestamp } = window.dbMetodos;
+        const texto = encodeURIComponent(`Olá Rose! Eu sou ${nomeCliente} e gostaria de encomendar: ${_pedidoProduto} pelo site.`);
 
-        try {
-            // Salva o pedido no Firestore
-            await addDoc(collection(window.db, "pedidos"), {
+        // Abre o WhatsApp IMEDIATAMENTE (dentro do clique = sem bloqueio no mobile)
+        window.location.href = `https://wa.me/${fone}?text=${texto}`;
+
+        // Fecha o modal
+        fecharModalPedido();
+
+        // Salva no Firestore em background (não bloqueia o WhatsApp)
+        if (window.dbMetodos && window.db) {
+            const { collection, addDoc, serverTimestamp } = window.dbMetodos;
+            addDoc(collection(window.db, "pedidos"), {
                 cliente: nomeCliente,
-                produto: nomeProduto,
-                valor: preco,
+                produto: _pedidoProduto,
+                valor: _pedidoPreco,
                 status: "novo",
                 data: serverTimestamp()
-            });
-
-            // Após salvar, envia para o WhatsApp como confirmação
-            const texto = encodeURIComponent(`Olá Rose! Eu sou ${nomeCliente} e acabei de fazer um pedido de: ${nomeProduto} pelo site.`);
-            window.open(`https://wa.me/${fone}?text=${texto}`, '_blank');
-
-            alert("Pedido registrado com sucesso!");
-        } catch (e) {
-            console.error("Erro ao salvar pedido:", e);
-            alert("Erro ao registrar pedido. Tente novamente.");
+            }).catch(e => console.error("Erro ao salvar pedido:", e));
         }
     };
 

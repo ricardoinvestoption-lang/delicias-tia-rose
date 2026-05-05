@@ -1,3 +1,89 @@
+/* --- MODAL DE PEDIDO CUSTOMIZADO --- */
+#modal-pedido {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.55);
+    z-index: 9999;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+#modal-pedido-box {
+    background: #fff;
+    border-radius: 18px;
+    width: 100%;
+    max-width: 360px;
+    overflow: hidden;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.25);
+    animation: fadeInDown 0.25s ease;
+}
+
+#modal-pedido-header {
+    background: linear-gradient(135deg, #e91e63, #c2185b);
+    color: white;
+    padding: 16px 20px;
+    font-size: 1.1rem;
+    font-weight: bold;
+}
+
+#modal-pedido-body {
+    padding: 20px;
+}
+
+#modal-nome-produto {
+    margin: 0 0 14px;
+    font-size: 0.95rem;
+    color: #8c6239;
+    font-weight: bold;
+}
+
+#modal-input-nome {
+    width: 100%;
+    padding: 13px 14px;
+    border: 1.5px solid #ddd;
+    border-radius: 10px;
+    font-size: 1rem;
+    box-sizing: border-box;
+    outline: none;
+    transition: border 0.2s;
+}
+
+#modal-input-nome:focus {
+    border-color: #e91e63;
+}
+
+#modal-botoes {
+    display: flex;
+    gap: 10px;
+    margin-top: 16px;
+}
+
+#modal-btn-cancelar {
+    flex: 1;
+    padding: 12px;
+    border: 1.5px solid #ddd;
+    border-radius: 10px;
+    background: #fff;
+    color: #666;
+    font-size: 0.95rem;
+    cursor: pointer;
+}
+
+#modal-btn-confirmar {
+    flex: 2;
+    padding: 12px;
+    border: none;
+    border-radius: 10px;
+    background: #25d366;
+    color: white;
+    font-size: 0.95rem;
+    font-weight: bold;
+    cursor: pointer;
+}
+
 /* --- BANNER DE AVISO (EDITÁVEL) --- */
 #banner-aviso {
     background: linear-gradient(135deg, #e91e63, #c2185b);
