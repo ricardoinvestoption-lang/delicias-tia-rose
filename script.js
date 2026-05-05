@@ -14,10 +14,45 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    window.encomendar = (nome) => {
+    window.encomendar = async (nomeProduto, preco) => {
+        const nomeCliente = prompt("Para organizar seu pedido, qual seu nome?");
+        if (!nomeCliente) return;
+
         const fone = "5516991839509";
-        const texto = encodeURIComponent(`Olá Rose! Gostaria de encomendar: ${nome}`);
-        window.open(`https://wa.me/${fone}?text=${texto}`, '_blank');
+        const { collection, addDoc, serverTimestamp } = window.dbMetodos;
+
+        try {
+            // Salva o pedido no Firestore
+            await addDoc(collection(window.db, "pedidos"), {
+                cliente: nomeCliente,
+                produto: nomeProduto,
+                valor: preco,
+                status: "novo",
+                data: serverTimestamp()
+            });
+
+            // Após salvar, envia para o WhatsApp como confirmação
+            const texto = encodeURIComponent(`Olá Rose! Eu sou ${nomeCliente} e acabei de fazer um pedido de: ${nomeProduto} pelo site.`);
+            window.open(`https://wa.me/${fone}?text=${texto}`, '_blank');
+
+            alert("Pedido registrado com sucesso!");
+        } catch (e) {
+            console.error("Erro ao salvar pedido:", e);
+            alert("Erro ao registrar pedido. Tente novamente.");
+        }
+    };
+
+    // Funções para gerenciar o status do pedido
+    window.marcarComoEntregue = async (id) => {
+        const { updateDoc, doc } = window.dbMetodos;
+        await updateDoc(doc(window.db, "pedidos", id), { status: "concluído" });
+    };
+
+    window.excluirPedido = async (id) => {
+        if (confirm("Excluir este registro de pedido?")) {
+            const { deleteDoc, doc } = window.dbMetodos;
+            await deleteDoc(doc(window.db, "pedidos", id));
+        }
     };
 
     // --- INDICADORES DE PÁGINA (BOLINHAS) ---
@@ -72,23 +107,14 @@ document.addEventListener('DOMContentLoaded', () => {
             const elemento = document.getElementById(targetId);
             if (!elemento) return;
 
-            // Promoções ficam sempre visíveis — só rola até elas
-            if (targetId === 'secao-promocoes') {
-                setTimeout(() => {
-                    window.scrollTo({
-                        top: elemento.offsetTop - 20,
-                        behavior: 'smooth'
-                    });
-                }, 50);
-                return;
-            }
-
             const jaAberto = elemento.classList.contains('visivel');
 
             if (jaAberto) {
+                // Fecha a seção
                 elemento.classList.remove('visivel');
                 elemento.style.display = 'none';
             } else {
+                // Abre a seção e rola até ela
                 elemento.classList.add('visivel');
                 setTimeout(() => {
                     window.scrollTo({
@@ -104,7 +130,7 @@ document.addEventListener('DOMContentLoaded', () => {
     setTimeout(() => {
         if (!window.dbMetodos) return;
 
-        const { collection, addDoc, onSnapshot, deleteDoc, doc, query, orderBy, setDoc, getDoc } = window.dbMetodos;
+        const { collection, addDoc, onSnapshot, deleteDoc, doc, query, orderBy, setDoc, getDoc, updateDoc, serverTimestamp } = window.dbMetodos;
         const db = window.db;
         const produtosRef = collection(db, "produtos_v2");
 
@@ -205,7 +231,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             <div style="padding:15px">
                                 <h3 style="margin:0; font-size:1.1rem">${p.nome}</h3>
                                 <p style="color:#8c6239; font-weight:bold; margin:10px 0">R$ ${parseFloat(p.preco).toFixed(2).replace('.', ',')}</p>
-                                <button class="btn-whats" onclick="encomendar('${p.nome}')">Pedir no WhatsApp</button>
+                                <button class="btn-whats" onclick="encomendar('${p.nome}', '${p.preco}')">Pedir no WhatsApp</button>
                             </div>
                         `;
                         container.appendChild(card);
@@ -247,5 +273,41 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         inicializarVitrine();
+
+        // --- MONITORAR PEDIDOS (PAINEL ADMIN) ---
+        function monitorarPedidos() {
+            const q = query(collection(db, "pedidos"), orderBy("data", "desc"));
+
+            onSnapshot(q, (snapshot) => {
+                const container = document.getElementById('lista-pedidos-admin');
+                if (!container) return;
+                container.innerHTML = '';
+
+                snapshot.forEach((docSnap) => {
+                    const pedido = docSnap.data();
+                    const id = docSnap.id;
+                    const dataFormata = pedido.data ? pedido.data.toDate().toLocaleString('pt-BR') : 'Processando...';
+
+                    const cardPedido = document.createElement('div');
+                    cardPedido.style = `padding:10px; border-left:5px solid ${pedido.status === 'novo' ? '#e91e63' : '#25d366'}; background:#f9f9f9; border-radius:5px; box-shadow: 2px 2px 5px rgba(0,0,0,0.05)`;
+
+                    cardPedido.innerHTML = `
+                        <div style="display:flex; justify-content:space-between; align-items:center;">
+                            <div>
+                                <strong>${pedido.cliente}</strong> - <span style="color:#8c6239">${pedido.produto}</span><br>
+                                <small>${dataFormata} | Status: <b>${pedido.status}</b></small>
+                            </div>
+                            <div>
+                                ${pedido.status === 'novo' ? `<button onclick="marcarComoEntregue('${id}')" style="background:#25d366; color:white; border:none; padding:5px 10px; border-radius:5px; cursor:pointer;">Concluir</button>` : ''}
+                                <button onclick="excluirPedido('${id}')" style="background:none; border:none; color:red; cursor:pointer; margin-left:10px;">🗑️</button>
+                            </div>
+                        </div>
+                    `;
+                    container.appendChild(cardPedido);
+                });
+            });
+        }
+
+        monitorarPedidos();
     }, 1200);
 });
