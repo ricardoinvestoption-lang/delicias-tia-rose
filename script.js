@@ -303,28 +303,104 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (!container) return;
                 container.innerHTML = '';
 
+                // Agrupa pedidos por cliente para calcular total
+                const pedidosPorCliente = {};
                 snapshot.forEach((docSnap) => {
                     const pedido = docSnap.data();
-                    const id = docSnap.id;
-                    const dataFormata = pedido.data ? pedido.data.toDate().toLocaleString('pt-BR') : 'Processando...';
-
-                    const cardPedido = document.createElement('div');
-                    cardPedido.style = `padding:10px; border-left:5px solid ${pedido.status === 'novo' ? '#e91e63' : '#25d366'}; background:#f9f9f9; border-radius:5px; box-shadow: 2px 2px 5px rgba(0,0,0,0.05)`;
-
-                    cardPedido.innerHTML = `
-                        <div style="display:flex; justify-content:space-between; align-items:center;">
-                            <div>
-                                <strong>${pedido.cliente}</strong> - <span style="color:#8c6239">${pedido.produto}</span><br>
-                                <small>${dataFormata} | Status: <b>${pedido.status}</b></small>
-                            </div>
-                            <div>
-                                ${pedido.status === 'novo' ? `<button onclick="marcarComoEntregue('${id}')" style="background:#25d366; color:white; border:none; padding:5px 10px; border-radius:5px; cursor:pointer;">Concluir</button>` : ''}
-                                <button onclick="excluirPedido('${id}')" style="background:none; border:none; color:red; cursor:pointer; margin-left:10px;">🗑️</button>
-                            </div>
-                        </div>
-                    `;
-                    container.appendChild(cardPedido);
+                    const cliente = pedido.cliente || 'Desconhecido';
+                    if (!pedidosPorCliente[cliente]) {
+                        pedidosPorCliente[cliente] = { total: 0, pedidos: [] };
+                    }
+                    const valor = parseFloat(pedido.valor) || 0;
+                    pedidosPorCliente[cliente].total += valor;
+                    pedidosPorCliente[cliente].pedidos.push({ ...pedido, id: docSnap.id });
                 });
+
+                // Renderiza agrupado por cliente
+                Object.entries(pedidosPorCliente).forEach(([nomeCliente, dados]) => {
+                    // Cabeçalho do cliente com total
+                    const headerCliente = document.createElement('div');
+                    headerCliente.style = `
+                        background: linear-gradient(135deg, #fce4ec, #fff0f5);
+                        border: 1.5px solid #e91e63;
+                        border-radius: 10px;
+                        padding: 10px 14px;
+                        margin-top: 14px;
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                    `;
+                    headerCliente.innerHTML = `
+                        <span style="font-weight:bold; color:#c2185b; font-size:1rem;">👤 ${nomeCliente}</span>
+                        <span style="background:#c2185b; color:white; padding:4px 12px; border-radius:20px; font-size:0.9rem; font-weight:bold;">
+                            Total: R$ ${dados.total.toFixed(2).replace('.', ',')}
+                        </span>
+                    `;
+                    container.appendChild(headerCliente);
+
+                    // Pedidos do cliente
+                    dados.pedidos.forEach((pedido) => {
+                        const id = pedido.id;
+                        const dataFormata = pedido.data ? pedido.data.toDate().toLocaleString('pt-BR') : 'Processando...';
+                        const valorFormatado = pedido.valor
+                            ? `R$ ${parseFloat(pedido.valor).toFixed(2).replace('.', ',')}`
+                            : 'Valor não informado';
+
+                        const cardPedido = document.createElement('div');
+                        cardPedido.style = `
+                            padding: 10px 14px;
+                            border-left: 5px solid ${pedido.status === 'novo' ? '#e91e63' : '#25d366'};
+                            background: #f9f9f9;
+                            border-radius: 0 8px 8px 0;
+                            margin-top: 6px;
+                            margin-left: 10px;
+                            box-shadow: 2px 2px 5px rgba(0,0,0,0.05);
+                        `;
+
+                        cardPedido.innerHTML = `
+                            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+                                <div>
+                                    <span style="color:#8c6239; font-weight:bold;">${pedido.produto}</span>
+                                    <span style="margin-left:10px; background:#fff3e0; color:#8c6239; border:1px solid #ffcc80; padding:2px 10px; border-radius:20px; font-size:0.85rem; font-weight:bold;">${valorFormatado}</span><br>
+                                    <small style="color:#888;">${dataFormata} | Status: <b style="color:${pedido.status === 'novo' ? '#e91e63' : '#25d366'}">${pedido.status}</b></small>
+                                </div>
+                                <div style="display:flex; align-items:center; gap:8px;">
+                                    ${pedido.status === 'novo' ? `<button onclick="marcarComoEntregue('${id}')" style="background:#25d366; color:white; border:none; padding:5px 12px; border-radius:5px; cursor:pointer; font-size:0.85rem;">✅ Concluir</button>` : ''}
+                                    <button onclick="excluirPedido('${id}')" style="background:none; border:none; color:red; cursor:pointer; font-size:1.1rem;">🗑️</button>
+                                </div>
+                            </div>
+                        `;
+                        container.appendChild(cardPedido);
+                    });
+                });
+
+                // Resumo geral no topo
+                let totalGeral = 0;
+                let totalPedidos = 0;
+                snapshot.forEach((docSnap) => {
+                    totalGeral += parseFloat(docSnap.data().valor) || 0;
+                    totalPedidos++;
+                });
+
+                if (totalPedidos > 0) {
+                    const resumo = document.createElement('div');
+                    resumo.style = `
+                        background: linear-gradient(135deg, #e91e63, #c2185b);
+                        color: white;
+                        border-radius: 10px;
+                        padding: 12px 16px;
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                        margin-bottom: 4px;
+                        font-weight: bold;
+                    `;
+                    resumo.innerHTML = `
+                        <span>📊 ${totalPedidos} pedido(s) | ${Object.keys(pedidosPorCliente).length} cliente(s)</span>
+                        <span style="font-size:1.1rem;">💰 Total Geral: R$ ${totalGeral.toFixed(2).replace('.', ',')}</span>
+                    `;
+                    container.prepend(resumo);
+                }
             });
         }
 
