@@ -4,126 +4,155 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Delícias da Tia Rose</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-    <!-- MODAL DE PEDIDO -->
+    <!-- MODAL DE PEDIDO (nome do cliente) -->
     <div id="modal-pedido">
         <div id="modal-pedido-box">
             <div id="modal-pedido-header">
-                🛍️ Fazer Pedido
+                <span>🛍️ Finalizar Pedido</span>
             </div>
             <div id="modal-pedido-body">
-                <p id="modal-nome-produto"></p>
+                <p style="margin:0 0 14px; font-size:0.9rem; color:#666;">Digite seu nome para enviar o pedido pelo WhatsApp:</p>
                 <input type="text" id="modal-input-nome" placeholder="Seu nome completo..." autocomplete="name" />
                 <div id="modal-botoes">
                     <button id="modal-btn-cancelar" onclick="fecharModalPedido()">Cancelar</button>
-                    <button id="modal-btn-confirmar" onclick="confirmarPedido()">Pedir no WhatsApp ✅</button>
+                    <button id="modal-btn-confirmar" onclick="confirmarPedido()">Enviar no WhatsApp ✅</button>
                 </div>
             </div>
         </div>
     </div>
 
+    <!-- MODAL DO CARRINHO -->
+    <div id="modal-carrinho">
+        <div id="modal-carrinho-box">
+            <div id="modal-carrinho-header">
+                <span>🛒 Meu Carrinho</span>
+                <button id="fechar-carrinho" onclick="fecharCarrinho()">✕</button>
+            </div>
+            <div id="modal-carrinho-body">
+                <div id="carrinho-lista"></div>
+                <div id="carrinho-vazio">
+                    <p style="font-size:2.5rem; margin:0;">🛒</p>
+                    <p>Seu carrinho está vazio</p>
+                    <p style="font-size:0.85rem; color:#bbb;">Adicione produtos para continuar</p>
+                </div>
+            </div>
+            <div id="modal-carrinho-footer">
+                <div id="carrinho-total-linha">
+                    <span>Total do pedido:</span>
+                    <span id="carrinho-total-valor">R$ 0,00</span>
+                </div>
+                <button id="btn-finalizar-pedido" onclick="abrirModalNome()">Pedir no WhatsApp 🚀</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- BOTÃO FLUTUANTE DO CARRINHO -->
+    <button id="btn-carrinho-flutuante" onclick="abrirCarrinho()">
+        🛒
+        <span id="carrinho-contador">0</span>
+    </button>
+
     <!-- BANNER DE AVISO -->
     <div id="banner-aviso">
-        <span>🌸</span>
+        <span>📢</span>
         <span id="texto-aviso">Faça suas encomendas até quinta-feira para o Dia das Mães! 🌸</span>
         <button id="fechar-aviso" onclick="document.getElementById('banner-aviso').style.display='none'">✕</button>
     </div>
 
-    <!-- HEADER -->
     <header>
         <h1 id="titulo-principal">Delícias da Tia Rose</h1>
         <p>Doces feitos com amor</p>
     </header>
 
-    <!-- CARROSSEL DE CATEGORIAS -->
     <section class="categorias-container">
         <h2 class="titulo-sessao">Conheça todos os nossos sabores</h2>
-
+        
         <div class="carrossel-wrapper">
+            <!-- Setas de Navegação -->
             <button class="seta seta-esq" onclick="scrollMenu(-1)">&#10094;</button>
             <button class="seta seta-dir" onclick="scrollMenu(1)">&#10095;</button>
 
+            <!-- Carrossel -->
             <div class="carrossel-scroll" id="menuCarrossel">
 
-                <div class="card-categoria card-promocao" style="background-image: linear-gradient(to top, rgba(120,20,20,0.88), rgba(0,0,0,0.1)), url('https://i.postimg.cc/5yQfxHKk/semanatem.jpg');">
+                <div class="card-categoria card-promocao" style="background-image: linear-gradient(to top, rgba(139,0,0,0.85), transparent), url('https://i.postimg.cc/BQ6V4W0M/promo.jpg');">
                     <div class="info-card">
-                        <span class="badge-promocao">⭐ Final de Semana Tem</span>
-                        <h3>Veja as Ofertas!</h3>
-                        <p class="texto-promocao">Encomende até quinta-feira 🌸</p>
-                        <button class="btn-filtro" data-target="secao-promocoes">Ver Opções</button>
+                        <span class="badge-promocao">🔥 OFERTA ESPECIAL</span>
+                        <h3>PROMOÇÃO</h3>
+                        <p class="texto-promocao">Encomende até quinta-feira! 🌸</p>
+                        <button class="btn-filtro" data-target="secao-promocoes">Ver Promoções</button>
                     </div>
                 </div>
 
-                <div class="card-categoria" style="background-image: linear-gradient(to top, rgba(0,0,0,0.82), rgba(0,0,0,0.08)), url('https://i.postimg.cc/7hfbrXLG/gelatinacolo.jpg');">
+                <div class="card-categoria" style="background-image: linear-gradient(to top, rgba(0,0,0,0.8), transparent), url('https://i.postimg.cc/7hfbrXLG/gelatinacolo.jpg');">
                     <div class="info-card">
-                        <h3>Doces</h3>
+                        <h3>DOCES</h3>
                         <button class="btn-filtro" data-target="secao-doces">Saiba mais</button>
                     </div>
                 </div>
 
-                <div class="card-categoria" style="background-image: linear-gradient(to top, rgba(0,0,0,0.82), rgba(0,0,0,0.08)), url('https://i.postimg.cc/hvZm065h/balas.png');">
+                <div class="card-categoria" style="background-image: linear-gradient(to top, rgba(0,0,0,0.8), transparent), url('https://i.postimg.cc/hvZm065h/balas.png');">
                     <div class="info-card">
-                        <h3>Balas de Coco</h3>
+                        <h3>BALAS DE COCO</h3>
                         <button class="btn-filtro" data-target="secao-balas">Saiba mais</button>
                     </div>
                 </div>
 
-                <div class="card-categoria" style="background-image: linear-gradient(to top, rgba(0,0,0,0.82), rgba(0,0,0,0.08)), url('https://i.postimg.cc/VvhStMJq/Ovos.png');">
+                <div class="card-categoria" style="background-image: linear-gradient(to top, rgba(0,0,0,0.8), transparent), url('https://i.postimg.cc/VvhStMJq/Ovos.png');">
                     <div class="info-card">
-                        <h3>Ovos de Páscoa</h3>
+                        <h3>OVOS DE PÁSCOA</h3>
                         <button class="btn-filtro" data-target="secao-ovos">Saiba mais</button>
                     </div>
                 </div>
 
-                <div class="card-categoria" style="background-image: linear-gradient(to top, rgba(0,0,0,0.82), rgba(0,0,0,0.08)), url('https://i.postimg.cc/HxSjNFTT/bolocapa.jpg');">
+                <div class="card-categoria" style="background-image: linear-gradient(to top, rgba(0,0,0,0.8), transparent), url('https://i.postimg.cc/HxSjNFTT/bolocapa.jpg');">
                     <div class="info-card">
-                        <h3>Bolos</h3>
+                        <h3>BOLOS</h3>
                         <button class="btn-filtro" data-target="secao-bolos">Saiba mais</button>
                     </div>
                 </div>
 
-                <div class="card-categoria" style="background-image: linear-gradient(to top, rgba(0,0,0,0.82), rgba(0,0,0,0.08)), url('https://i.postimg.cc/GhZ8hF0F/salgados.jpg');">
+                <div class="card-categoria" style="background-image: linear-gradient(to top, rgba(0,0,0,0.8), transparent), url('https://i.postimg.cc/GhZ8hF0F/salgados.jpg');">
                     <div class="info-card">
-                        <h3>Salgados</h3>
+                        <h3>SALGADOS</h3>
                         <button class="btn-filtro" data-target="secao-salgados">Saiba mais</button>
                     </div>
                 </div>
 
             </div><!-- fim carrossel-scroll -->
 
+            <!-- Bolinhas indicadoras de página -->
             <div class="carrossel-indicadores" id="indicadoresCarrossel"></div>
-        </div>
 
-        <p class="hint-deslize">Deslize ou use as setas para ver mais</p>
+        </div><!-- fim carrossel-wrapper -->
+
+        <!-- Dica de navegação -->
+        <p class="hint-deslize">👆 Deslize ou use as setas para ver mais categorias</p>
+
     </section>
 
-    <!-- CONTEÚDO PRINCIPAL -->
     <main class="container">
-
-        <!-- PAINEL ADMIN -->
-        <section id="admin-section" style="display: none;">
-            <h2>Painel de Controle · Tia Rose</h2>
+        <!-- ÁREA DE CADASTRO (ADMIN) -->
+        <section id="admin-section" style="display: none; padding: 20px; background: #fff; border-radius: 15px; margin-bottom: 30px;">
+            <h2>Painel de Controle - Tia Rose</h2>
 
             <!-- EDIÇÃO DO BANNER -->
-            <div style="background: var(--rosa-fundo); border: 1px solid var(--borda); border-radius: 14px; padding: 18px; margin-bottom: 22px;">
-                <h3 style="margin: 0 0 12px; color: var(--rosa-principal); font-family: 'Playfair Display', serif; font-size: 1rem; font-weight: 600;">📢 Editar Banner de Aviso</h3>
-                <input type="text" id="textoBanner" placeholder="Digite a mensagem do banner..." style="width:100%; padding:12px 16px; border:1.5px solid #e8d5c0; border-radius:12px; box-sizing:border-box; font-size:0.95rem; font-family:'DM Sans',sans-serif; background: #fff; outline:none;">
-                <div style="display:flex; gap:8px; margin-top:10px; flex-wrap:wrap;">
-                    <button onclick="salvarBanner()" style="background: var(--gradiente-rose); color:white; padding:10px 20px; border:none; border-radius:10px; cursor:pointer; font-family:'DM Sans',sans-serif; font-weight:600; font-size:0.85rem;">💾 Salvar Banner</button>
-                    <button onclick="document.getElementById('banner-aviso').style.display='none'" style="background:#aaa; color:white; padding:10px 18px; border:none; border-radius:10px; cursor:pointer; font-family:'DM Sans',sans-serif; font-size:0.85rem;">Ocultar</button>
-                    <button onclick="document.getElementById('banner-aviso').style.display='flex'" style="background:#25d366; color:white; padding:10px 18px; border:none; border-radius:10px; cursor:pointer; font-family:'DM Sans',sans-serif; font-size:0.85rem;">Mostrar</button>
-                </div>
+            <div style="background:#fff0f5; border:1px solid #e91e63; border-radius:10px; padding:15px; margin-bottom:20px;">
+                <h3 style="margin:0 0 10px; color:#c2185b;">📢 Editar Banner de Aviso</h3>
+                <input type="text" id="textoBanner" placeholder="Digite a mensagem do banner..." style="width:100%; padding:12px; border:1px solid #ddd; border-radius:8px; box-sizing:border-box; font-size:1rem;">
+                <button onclick="salvarBanner()" style="margin-top:10px; background:#e91e63; color:white; padding:10px 20px; border:none; border-radius:8px; cursor:pointer; font-weight:bold;">💾 Salvar Banner</button>
+                <button onclick="document.getElementById('banner-aviso').style.display='none'" style="margin-top:10px; margin-left:10px; background:#aaa; color:white; padding:10px 20px; border:none; border-radius:8px; cursor:pointer;">🙈 Ocultar Banner</button>
+                <button onclick="document.getElementById('banner-aviso').style.display='flex'" style="margin-top:10px; margin-left:10px; background:#25d366; color:white; padding:10px 20px; border:none; border-radius:8px; cursor:pointer;">👁️ Mostrar Banner</button>
             </div>
 
             <!-- CADASTRO DE PRODUTO -->
             <form id="doceForm">
                 <input type="text" id="nome" placeholder="Nome do Produto" required>
-                <input type="number" id="preco" placeholder="Preço (ex: 12.50)" step="0.01" required>
+                <input type="number" id="preco" placeholder="Preço" step="0.01" required>
                 <input type="url" id="urlImagem" placeholder="Link da Imagem" required>
                 <select id="categoria" required>
                     <option value="" disabled selected>Selecione a Categoria</option>
@@ -134,17 +163,19 @@
                     <option value="BOLOS">Bolos</option>
                     <option value="SALGADOS">Salgados</option>
                 </select>
-                <button type="submit" style="width:100%; background: var(--gradiente-rose); color:white; padding:13px; border:none; border-radius:12px; cursor:pointer; font-family:'DM Sans',sans-serif; font-weight:600; font-size:1rem; margin-top:6px; letter-spacing:0.02em;">Salvar na Nuvem ☁️</button>
+                <button type="submit" style="background: #25d366; color: white; padding: 10px; border: none; cursor: pointer; border-radius: 5px;">Salvar na Nuvem</button>
             </form>
 
-            <!-- PEDIDOS RECEBIDOS -->
-            <div style="margin-top: 30px; border: 1px solid var(--borda); border-radius: 14px; padding: 18px;">
-                <h3 style="color: var(--marrom); font-family: 'Playfair Display', serif; font-size: 1.1rem; font-weight: 600; margin-bottom: 14px;">📋 Pedidos Recebidos</h3>
-                <div id="lista-pedidos-admin" style="display: flex; flex-direction: column; gap: 10px;"></div>
+            <!-- ÁREA DE PEDIDOS NO ADMIN -->
+            <div style="margin-top:30px; background:#fff; border:1px solid #ddd; border-radius:10px; padding:15px;">
+                <h3 style="color:var(--marrom-doce);">📋 Pedidos Recebidos</h3>
+                <div id="lista-pedidos-admin" style="display: flex; flex-direction: column; gap: 10px;">
+                    <!-- Pedidos aparecerão aqui em tempo real -->
+                </div>
             </div>
         </section>
 
-        <!-- VITRINES -->
+        <!-- VITRINES — ocultas por padrão, reveladas ao clicar em "Saiba mais" -->
         <div id="secao-promocoes" class="categoria-vitrine vitrine-promocao">
             <h3 class="titulo-categoria titulo-promocao">🔥 Promoções da Semana</h3>
             <div id="listaPromocoes" class="grid"></div>
@@ -174,7 +205,6 @@
             <h3 class="titulo-categoria">🍫 Ovos de Páscoa</h3>
             <div id="listaOvos" class="grid"></div>
         </div>
-
     </main>
 
     <!-- FIREBASE CONFIG -->
