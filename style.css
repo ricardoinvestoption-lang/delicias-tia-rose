@@ -1,103 +1,626 @@
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=DM+Sans:wght@400;500;700&display=swap');
+/* ===================================================
+   DELÍCIAS DA TIA ROSE — Design Profissional
+   Tipografia: Playfair Display + DM Sans
+   Paleta: Rose dourado, creme sofisticado, bordô
+   =================================================== */
 
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@300;400;500;600&display=swap');
+
+/* --- VARIÁVEIS GLOBAIS --- */
 :root {
     --rosa-principal: #c9415a;
+    --rosa-escuro: #a52f45;
+    --rosa-claro: #f5d6dc;
     --rosa-fundo: #fdf6f0;
+    --creme: #fef9f4;
+    --dourado: #c9963a;
+    --dourado-claro: #f0d79e;
+    --marrom: #7a4a2e;
+    --marrom-claro: #a8703e;
     --texto-escuro: #2d1a12;
+    --texto-medio: #6b4c3b;
+    --texto-suave: #9e8070;
     --branco: #ffffff;
+    --sombra-suave: rgba(45, 26, 18, 0.08);
+    --sombra-media: rgba(45, 26, 18, 0.16);
+    --borda: rgba(201, 150, 58, 0.25);
+    --gradiente-rose: linear-gradient(135deg, #c9415a 0%, #a52f45 100%);
+    --gradiente-dourado: linear-gradient(135deg, #c9963a 0%, #a87828 100%);
+    --gradiente-creme: linear-gradient(180deg, #fdf6f0 0%, #fef9f4 100%);
 }
 
-* { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: 'DM Sans', sans-serif; background-color: var(--rosa-fundo); color: var(--texto-escuro); padding-bottom: 80px; }
+/* --- RESET & BASE --- */
+*, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
 
-/* BANNER */
-#banner-aviso { background: linear-gradient(135deg, #c9415a, #a52f45); color: white; padding: 10px; text-align: center; font-size: 0.9rem; display: flex; justify-content: center; align-items: center; gap: 10px; }
+body {
+    font-family: 'DM Sans', sans-serif;
+    background-color: var(--rosa-fundo);
+    color: var(--texto-escuro);
+    -webkit-font-smoothing: antialiased;
+}
 
-header { text-align: center; padding: 40px 20px; }
-header h1 { font-family: 'Playfair Display', serif; color: var(--rosa-principal); font-size: 2.2rem; cursor: pointer; }
+/* --- BANNER DE AVISO --- */
+#banner-aviso {
+    background: var(--gradiente-rose);
+    color: white;
+    text-align: center;
+    padding: 11px 50px;
+    font-size: 0.88rem;
+    font-weight: 500;
+    letter-spacing: 0.03em;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
 
-/* TEXTO DESTAQUE (BRANCO COM BORDA PRETA) */
-.texto-destaque {
-    color: white !important;
-    text-shadow: 
-        -1.5px -1.5px 0 #000,  
-         1.5px -1.5px 0 #000,
-        -1.5px  1.5px 0 #000,
-         1.5px  1.5px 0 #000,
-         0px 2px 5px rgba(0,0,0,0.8);
+#fechar-aviso {
+    position: absolute;
+    right: 16px;
+    background: none;
+    border: none;
+    color: rgba(255,255,255,0.7);
+    font-size: 1rem;
+    cursor: pointer;
+    padding: 4px;
+    line-height: 1;
+    transition: color 0.2s;
+}
+#fechar-aviso:hover { color: white; }
+
+/* --- HEADER --- */
+header {
+    text-align: center;
+    padding: 50px 20px 30px;
+    position: relative;
+}
+
+header::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 50%;
+    transform: translateX(-50%);
+    width: 1px;
+    height: 40px;
+    background: var(--borda);
+}
+
+header h1 {
     font-family: 'Playfair Display', serif;
-    font-size: 1.8rem !important;
+    color: var(--rosa-principal);
+    font-size: 2.6rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    cursor: pointer;
+    line-height: 1.1;
 }
 
-.titulo-sessao { text-align: center; font-size: 1.1rem; margin-bottom: 20px; }
+header p {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    color: var(--texto-suave);
+    font-size: 1rem;
+    margin-top: 6px;
+    letter-spacing: 0.04em;
+}
 
-/* CARROSSEL */
-.carrossel-wrapper { position: relative; width: 100%; max-width: 500px; margin: 0 auto; }
+/* Ornamento decorativo */
+header::after {
+    content: '— ✦ —';
+    display: block;
+    color: var(--dourado);
+    font-size: 0.85rem;
+    letter-spacing: 0.2em;
+    margin-top: 16px;
+    opacity: 0.7;
+}
+
+/* --- SEÇÃO CARROSSEL --- */
+.categorias-container {
+    text-align: center;
+    padding: 10px 0 30px;
+}
+
+.titulo-sessao {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    color: var(--marrom-claro);
+    margin-bottom: 28px;
+    font-size: 1.05rem;
+    font-weight: 400;
+}
+
+.carrossel-wrapper {
+    position: relative;
+    width: 82%;
+    max-width: 420px;
+    margin: 0 auto;
+    overflow: visible;
+}
+
 .carrossel-scroll {
     display: flex;
     overflow-x: auto;
     scroll-snap-type: x mandatory;
-    gap: 15px;
-    padding: 10px 40px;
+    scroll-behavior: smooth;
+    gap: 14px;
+    border-radius: 20px;
     scrollbar-width: none;
+    padding: 0 10%;
+    scroll-padding: 0 10%;
+    box-sizing: border-box;
 }
+
 .carrossel-scroll::-webkit-scrollbar { display: none; }
 
 .card-categoria {
-    flex: 0 0 85%;
-    height: 380px;
-    border-radius: 20px;
+    flex: 0 0 100%;
+    height: 420px;
+    scroll-snap-align: center;
     background-size: cover;
     background-position: center;
-    position: relative;
     display: flex;
-    align-items: flex-end;
-    padding: 20px;
-    scroll-snap-align: center;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding-bottom: 28px;
+    border-radius: 20px;
+    box-shadow: 0 12px 40px rgba(45, 26, 18, 0.28);
+    transition: transform 0.3s ease;
+    overflow: hidden;
+    position: relative;
 }
 
-.seta { position: absolute; top: 50%; transform: translateY(-50%); background: white; border: none; width: 35px; height: 35px; border-radius: 50%; color: var(--rosa-principal); box-shadow: 0 2px 10px rgba(0,0,0,0.2); z-index: 10; cursor: pointer; }
-.seta-esq { left: 10px; }
-.seta-dir { right: 10px; }
+.card-categoria::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 20px;
+    border: 1px solid rgba(255,255,255,0.12);
+    pointer-events: none;
+}
 
-.btn-filtro { background: white; color: var(--rosa-principal); border: none; padding: 10px 20px; border-radius: 20px; font-weight: 700; cursor: pointer; margin-top: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
+.info-card {
+    padding: 0 22px;
+    position: relative;
+    z-index: 2;
+}
 
-/* VITRINE E CARDS */
-.categoria-vitrine { display: none; padding: 20px; }
-.categoria-vitrine.visivel { display: block; }
-.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 15px; }
+.info-card h3 {
+    color: white;
+    font-family: 'Playfair Display', serif;
+    font-size: 1.65rem;
+    font-weight: 700;
+    text-shadow: 0 2px 12px rgba(0,0,0,0.5);
+    margin-bottom: 14px;
+    letter-spacing: 0.01em;
+}
 
-.card { background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.05); text-align: center; }
-.card img { width: 100%; height: 130px; object-fit: cover; }
+/* --- CARD PROMOÇÃO --- */
+.card-promocao {
+    border: 2px solid var(--dourado);
+    box-shadow: 0 12px 40px rgba(45, 26, 18, 0.3), 0 0 0 1px var(--dourado-claro);
+}
 
-/* CONTROLES DE QUANTIDADE NO CARD */
-.card-controles {
+.badge-promocao {
+    display: inline-block;
+    background: var(--gradiente-dourado);
+    color: white;
+    font-size: 0.72rem;
+    font-weight: 600;
+    padding: 5px 14px;
+    border-radius: 30px;
+    margin-bottom: 10px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.texto-promocao {
+    color: rgba(255,255,255,0.9);
+    font-size: 0.88rem;
+    margin: 0 0 14px 0;
+    text-shadow: 0 1px 6px rgba(0,0,0,0.6);
+}
+
+/* --- BOTÃO FILTRO --- */
+.btn-filtro {
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    color: white;
+    border: 1.5px solid rgba(255,255,255,0.5);
+    padding: 10px 22px;
+    border-radius: 30px;
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 600;
+    font-size: 0.85rem;
+    letter-spacing: 0.04em;
+    cursor: pointer;
+    transition: background 0.2s, border-color 0.2s, transform 0.15s;
+}
+
+.btn-filtro:hover {
+    background: rgba(255,255,255,0.28);
+    border-color: rgba(255,255,255,0.8);
+}
+
+.btn-filtro:active { transform: scale(0.96); }
+
+/* --- SETAS DE NAVEGAÇÃO --- */
+.seta {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-60%);
+    background: white;
+    color: var(--rosa-principal);
+    border: none;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    font-size: 0.95rem;
+    box-shadow: 0 4px 16px var(--sombra-media);
+    z-index: 10;
+    cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 12px;
-    margin: 10px 0;
+    transition: transform 0.15s, box-shadow 0.15s, color 0.15s;
 }
-.btn-qtd-card {
-    background: #f0f0f0;
-    border: none;
-    width: 28px;
-    height: 28px;
+
+.seta:hover {
+    color: var(--rosa-escuro);
+    box-shadow: 0 6px 22px rgba(45, 26, 18, 0.22);
+}
+
+.seta:active {
+    transform: translateY(-60%) scale(0.92);
+}
+
+.seta-esq { left: -22px; }
+.seta-dir { right: -22px; }
+
+/* --- INDICADORES (BOLINHAS) --- */
+.carrossel-indicadores {
+    display: flex;
+    justify-content: center;
+    gap: 6px;
+    margin-top: 16px;
+}
+
+.indicador {
+    width: 6px;
+    height: 6px;
     border-radius: 50%;
-    font-weight: bold;
-    cursor: pointer;
+    background: var(--rosa-claro);
+    transition: background 0.3s, transform 0.3s, width 0.3s;
 }
-.qtd-numero { font-weight: bold; font-size: 1rem; min-width: 20px; }
 
-.btn-whats { background: var(--rosa-principal); color: white; border: none; padding: 12px; width: 100%; cursor: pointer; font-weight: bold; }
+.indicador.ativo {
+    background: var(--rosa-principal);
+    transform: scale(1.2);
+    width: 18px;
+    border-radius: 4px;
+}
 
-/* CARRINHO */
-#btn-flutuante-carrinho { position: fixed; bottom: 20px; right: 20px; background: var(--rosa-principal); color: white; padding: 15px 25px; border-radius: 50px; display: none; z-index: 100; box-shadow: 0 5px 20px rgba(0,0,0,0.3); font-weight: bold; }
-#contador-carrinho { background: white; color: var(--rosa-principal); border-radius: 50%; padding: 2px 8px; margin-right: 5px; font-size: 0.8rem; }
+/* --- HINT --- */
+.hint-deslize {
+    text-align: center;
+    font-size: 0.76rem;
+    color: var(--texto-suave);
+    margin-top: 10px;
+    letter-spacing: 0.03em;
+}
 
-.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); display: none; align-items: flex-end; z-index: 1000; }
-.modal-carrinho-content { background: white; width: 100%; padding: 25px; border-radius: 25px 25px 0 0; max-height: 85vh; overflow-y: auto; }
-.btn-voltar-carrinho { background: #eee; border: none; padding: 10px 20px; border-radius: 10px; cursor: pointer; margin-bottom: 15px; font-weight: bold; }
-.item-carrinho { display: flex; justify-content: space-between; padding: 15px 0; border-bottom: 1px solid #eee; align-items: center; }
-#btn-finalizar-whatsapp { width: 100%; background: #25d366; color: white; border: none; padding: 16px; border-radius: 15px; font-weight: bold; font-size: 1.1rem; margin-top: 15px; cursor: pointer; }
-#nome-cliente-carrinho { width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #ddd; margin-top: 10px; }
+/* --- CONTAINER PRINCIPAL --- */
+.container {
+    max-width: 980px;
+    margin: 0 auto;
+    padding: 10px 20px 60px;
+}
+
+/* --- VITRINES DE CATEGORIA --- */
+.categoria-vitrine {
+    margin-bottom: 50px;
+    display: none;
+}
+
+#secao-promocoes { display: block; }
+
+.titulo-categoria {
+    font-family: 'Playfair Display', serif;
+    color: var(--marrom);
+    font-size: 1.4rem;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 24px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid var(--borda);
+    width: 100%;
+}
+
+/* --- VITRINE PROMOÇÕES --- */
+.vitrine-promocao {
+    background: linear-gradient(135deg, #fff8f0, #fef3e8);
+    border: 1.5px solid var(--dourado-claro);
+    border-radius: 20px;
+    padding: 28px;
+    box-shadow: 0 4px 20px rgba(201, 150, 58, 0.1);
+}
+
+.titulo-promocao {
+    color: var(--dourado) !important;
+    border-bottom-color: var(--dourado-claro) !important;
+}
+
+/* --- GRID DE PRODUTOS --- */
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+    gap: 18px;
+}
+
+/* --- CARD PRODUTO --- */
+.card {
+    background: var(--branco);
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 2px 12px var(--sombra-suave);
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+    border: 1px solid rgba(201, 150, 58, 0.12);
+    position: relative;
+}
+
+.card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 30px var(--sombra-media);
+}
+
+.card img {
+    width: 100%;
+    height: 155px;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.4s ease;
+}
+
+.card:hover img { transform: scale(1.04); }
+
+/* Conteúdo do card vindo do JS — estilizado via classe global */
+.card > div:last-child {
+    padding: 14px 16px 16px;
+}
+
+.card h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1rem !important;
+    font-weight: 600 !important;
+    color: var(--texto-escuro);
+    margin-bottom: 6px !important;
+    line-height: 1.3;
+}
+
+.card p {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 1.05rem !important;
+    font-weight: 600 !important;
+    color: var(--rosa-principal) !important;
+    margin-bottom: 12px !important;
+}
+
+/* --- BOTÃO WHATSAPP --- */
+.btn-whats {
+    background: #25d366;
+    color: white;
+    border: none;
+    width: 100%;
+    padding: 10px 14px;
+    border-radius: 10px;
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 600;
+    font-size: 0.85rem;
+    letter-spacing: 0.02em;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.15s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+}
+
+.btn-whats::before { content: ''; }
+.btn-whats:hover { background: #20b857; }
+.btn-whats:active { transform: scale(0.97); }
+
+/* --- BADGE PROMOÇÃO NOS CARDS --- */
+.card > div[style*="e91e63"] {
+    background: var(--gradiente-dourado) !important;
+    color: white;
+    font-size: 0.72rem;
+    font-weight: 600;
+    padding: 5px 12px;
+    letter-spacing: 0.06em;
+    text-align: center;
+}
+
+/* --- MODAL DE PEDIDO --- */
+#modal-pedido {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(45, 26, 18, 0.6);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    z-index: 9999;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+#modal-pedido-box {
+    background: var(--branco);
+    border-radius: 22px;
+    width: 100%;
+    max-width: 360px;
+    overflow: hidden;
+    box-shadow: 0 24px 60px rgba(45, 26, 18, 0.3);
+    animation: modalEntrar 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes modalEntrar {
+    from { opacity: 0; transform: scale(0.92) translateY(12px); }
+    to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+#modal-pedido-header {
+    background: var(--gradiente-rose);
+    color: white;
+    padding: 18px 22px;
+    font-family: 'Playfair Display', serif;
+    font-size: 1.1rem;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+}
+
+#modal-pedido-body {
+    padding: 22px;
+}
+
+#modal-nome-produto {
+    margin: 0 0 16px;
+    font-size: 0.9rem;
+    color: var(--marrom-claro);
+    font-weight: 500;
+    background: var(--rosa-fundo);
+    padding: 10px 14px;
+    border-radius: 10px;
+}
+
+#modal-input-nome {
+    width: 100%;
+    padding: 13px 16px;
+    border: 1.5px solid #e8d5c0;
+    border-radius: 12px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.95rem;
+    color: var(--texto-escuro);
+    background: var(--creme);
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+#modal-input-nome:focus {
+    border-color: var(--rosa-principal);
+    box-shadow: 0 0 0 3px rgba(201, 65, 90, 0.12);
+}
+
+#modal-input-nome::placeholder { color: var(--texto-suave); }
+
+#modal-botoes {
+    display: flex;
+    gap: 10px;
+    margin-top: 16px;
+}
+
+#modal-btn-cancelar {
+    flex: 1;
+    padding: 12px;
+    border: 1.5px solid #e0ccc0;
+    border-radius: 12px;
+    background: transparent;
+    color: var(--texto-medio);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+#modal-btn-cancelar:hover { background: var(--rosa-fundo); }
+
+#modal-btn-confirmar {
+    flex: 2;
+    padding: 12px;
+    border: none;
+    border-radius: 12px;
+    background: #25d366;
+    color: white;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.15s;
+}
+
+#modal-btn-confirmar:hover { background: #20b857; }
+#modal-btn-confirmar:active { transform: scale(0.97); }
+
+/* --- ANIMAÇÃO VITRINE --- */
+@keyframes fadeInDown {
+    from { opacity: 0; transform: translateY(-14px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+.categoria-vitrine.visivel {
+    display: block;
+    animation: fadeInDown 0.35s ease;
+}
+
+/* --- PAINEL ADMIN --- */
+#admin-section {
+    background: var(--branco);
+    border-radius: 20px;
+    border: 1px solid var(--borda);
+    box-shadow: 0 4px 20px var(--sombra-suave);
+    padding: 28px !important;
+    margin-bottom: 40px;
+}
+
+#admin-section h2 {
+    font-family: 'Playfair Display', serif;
+    color: var(--marrom);
+    font-size: 1.5rem;
+    margin-bottom: 20px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--borda);
+}
+
+#doceForm input,
+#doceForm select {
+    width: 100%;
+    padding: 12px 16px;
+    margin: 6px 0;
+    border: 1.5px solid #e8d5c0;
+    border-radius: 12px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.95rem;
+    color: var(--texto-escuro);
+    background: var(--creme);
+    outline: none;
+    transition: border-color 0.2s;
+    box-sizing: border-box;
+}
+
+#doceForm input:focus,
+#doceForm select:focus {
+    border-color: var(--rosa-principal);
+    box-shadow: 0 0 0 3px rgba(201, 65, 90, 0.1);
+}
+
+/* Scrollbar customizada */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--rosa-claro); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--rosa-principal); }
+
+/* --- RESPONSIVO --- */
+@media (max-width: 480px) {
+    header h1 { font-size: 2rem; }
+    .grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 14px; }
+    .card-categoria { height: 380px; }
+    .vitrine-promocao { padding: 18px; }
+}
