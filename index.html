@@ -4,32 +4,41 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Delícias da Tia Rose</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-    <!-- MODAL DE PEDIDO CUSTOMIZADO -->
-    <div id="modal-pedido">
-        <div id="modal-pedido-box">
-            <div id="modal-pedido-header">
-                <span>🛍️ Fazer Pedido</span>
-            </div>
-            <div id="modal-pedido-body">
-                <p id="modal-nome-produto"></p>
-                <input type="text" id="modal-input-nome" placeholder="Seu nome completo..." autocomplete="name" />
-                <div id="modal-botoes">
-                    <button id="modal-btn-cancelar" onclick="fecharModalPedido()">Cancelar</button>
-                    <button id="modal-btn-confirmar" onclick="confirmarPedido()">Pedir no WhatsApp ✅</button>
-                </div>
-            </div>
-        </div>
+    <div id="banner-aviso" style="display: none;">
+        <span>🌸</span>
+        <span id="texto-aviso">Carregando novidades...</span>
+        <button id="fechar-aviso" onclick="document.getElementById('banner-aviso').style.display='none'">✕</button>
     </div>
 
-    <!-- BANNER DE AVISO -->
-    <div id="banner-aviso">
-        <span>📢</span>
-        <span id="texto-aviso">Faça suas encomendas até quinta-feira para o Dia das Mães! 🌸</span>
-        <button id="fechar-aviso" onclick="document.getElementById('banner-aviso').style.display='none'">✕</button>
+    <div id="btn-flutuante-carrinho" onclick="abrirCarrinho()">
+        <span id="contador-carrinho">0</span>
+        🛒 Ver Carrinho
+    </div>
+
+    <div id="modal-carrinho" class="modal-overlay">
+        <div class="modal-carrinho-content">
+            <button class="btn-voltar-carrinho" onclick="fecharCarrinho()">← Voltar</button>
+            <h3 style="margin-bottom: 20px; font-family: 'Playfair Display', serif;">🛍️ Seu Carrinho</h3>
+            
+            <div id="itens-carrinho-lista"></div>
+
+            <div class="carrinho-footer">
+                <div class="carrinho-total">
+                    <span>Total:</span>
+                    <span id="carrinho-valor-total">R$ 0,00</span>
+                </div>
+                <input type="text" id="nome-cliente-carrinho" placeholder="Seu nome completo..." />
+                <button id="btn-finalizar-whatsapp" onclick="enviarCarrinhoWhatsApp()">
+                    Finalizar Pedido no WhatsApp ✅
+                </button>
+            </div>
+        </div>
     </div>
 
     <header>
@@ -39,148 +48,63 @@
 
     <section class="categorias-container">
         <h2 class="titulo-sessao">Conheça todos os nossos sabores</h2>
-        
         <div class="carrossel-wrapper">
-            <!-- Setas de Navegação -->
             <button class="seta seta-esq" onclick="scrollMenu(-1)">&#10094;</button>
             <button class="seta seta-dir" onclick="scrollMenu(1)">&#10095;</button>
 
-            <!-- Carrossel -->
             <div class="carrossel-scroll" id="menuCarrossel">
-
-                <div class="card-categoria card-promocao" style="background-image: linear-gradient(to top, rgba(139,0,0,0.85), transparent), url('https://i.postimg.cc/5yQfxHKk/semanatem.jpg');">
+                <div class="card-categoria" style="background-image: url('https://i.postimg.cc/5yQfxHKk/semanatem.jpg');">
                     <div class="info-card">
-                        <span class="badge-promocao">FINAL DE SEMANA TEM </span>
-                        <h3>VEJA !!!</h3>
-                        <p class="texto-promocao">Encomende até quinta-feira ! 🌸</p>
-                        <button class="btn-filtro" data-target="secao-promocoes">VER OPÇÕES </button>
+                        <h3 class="texto-destaque">Promoções</h3>
+                        <button class="btn-filtro" data-target="secao-promocoes">Ver Opções</button>
                     </div>
                 </div>
-
-                <div class="card-categoria" style="background-image: linear-gradient(to top, rgba(0,0,0,0.8), transparent), url('https://i.postimg.cc/7hfbrXLG/gelatinacolo.jpg');">
+                <div class="card-categoria" style="background-image: url('https://i.postimg.cc/7hfbrXLG/gelatinacolo.jpg');">
                     <div class="info-card">
-                        <h3>DOCES</h3>
-                        <button class="btn-filtro" data-target="secao-doces">Saiba mais</button>
+                        <h3 class="texto-destaque">Doces</h3>
+                        <button class="btn-filtro" data-target="secao-doces">Saiba Mais</button>
                     </div>
                 </div>
-
-                <div class="card-categoria" style="background-image: linear-gradient(to top, rgba(0,0,0,0.8), transparent), url('https://i.postimg.cc/hvZm065h/balas.png');">
+                <div class="card-categoria" style="background-image: url('https://i.postimg.cc/hvZm065h/balas.png');">
                     <div class="info-card">
-                        <h3>BALAS DE COCO</h3>
-                        <button class="btn-filtro" data-target="secao-balas">Saiba mais</button>
+                        <h3 class="texto-destaque">Balas de Coco</h3>
+                        <button class="btn-filtro" data-target="secao-balas">Saiba Mais</button>
                     </div>
                 </div>
-
-                <div class="card-categoria" style="background-image: linear-gradient(to top, rgba(0,0,0,0.8), transparent), url('https://i.postimg.cc/VvhStMJq/Ovos.png');">
+                <div class="card-categoria" style="background-image: url('https://i.postimg.cc/VvhStMJq/Ovos.png');">
                     <div class="info-card">
-                        <h3>OVOS DE PÁSCOA</h3>
-                        <button class="btn-filtro" data-target="secao-ovos">Saiba mais</button>
+                        <h3 class="texto-destaque">Páscoa</h3>
+                        <button class="btn-filtro" data-target="secao-ovos">Saiba Mais</button>
                     </div>
                 </div>
-
-                <div class="card-categoria" style="background-image: linear-gradient(to top, rgba(0,0,0,0.8), transparent), url('https://i.postimg.cc/HxSjNFTT/bolocapa.jpg');">
+                <div class="card-categoria" style="background-image: url('https://i.postimg.cc/HxSjNFTT/bolocapa.jpg');">
                     <div class="info-card">
-                        <h3>BOLOS</h3>
-                        <button class="btn-filtro" data-target="secao-bolos">Saiba mais</button>
+                        <h3 class="texto-destaque">Bolos</h3>
+                        <button class="btn-filtro" data-target="secao-bolos">Saiba Mais</button>
                     </div>
                 </div>
-
-                <div class="card-categoria" style="background-image: linear-gradient(to top, rgba(0,0,0,0.8), transparent), url('https://i.postimg.cc/GhZ8hF0F/salgados.jpg');">
+                <div class="card-categoria" style="background-image: url('https://i.postimg.cc/GhZ8hF0F/salgados.jpg');">
                     <div class="info-card">
-                        <h3>SALGADOS</h3>
-                        <button class="btn-filtro" data-target="secao-salgados">Saiba mais</button>
+                        <h3 class="texto-destaque">Salgados</h3>
+                        <button class="btn-filtro" data-target="secao-salgados">Saiba Mais</button>
                     </div>
                 </div>
-
-            </div><!-- fim carrossel-scroll -->
-
-            <!-- Bolinhas indicadoras de página -->
-            <div class="carrossel-indicadores" id="indicadoresCarrossel"></div>
-
-        </div><!-- fim carrossel-wrapper -->
-
-        <!-- Dica de navegação -->
-        <p class="hint-deslize">👆 Deslize ou use as setas para ver mais categorias</p>
-
+            </div>
+        </div>
     </section>
 
     <main class="container">
-        <!-- ÁREA DE CADASTRO (ADMIN) -->
-        <section id="admin-section" style="display: none; padding: 20px; background: #fff; border-radius: 15px; margin-bottom: 30px;">
-            <h2>Painel de Controle - Tia Rose</h2>
-
-            <!-- EDIÇÃO DO BANNER -->
-            <div style="background:#fff0f5; border:1px solid #e91e63; border-radius:10px; padding:15px; margin-bottom:20px;">
-                <h3 style="margin:0 0 10px; color:#c2185b;">📢 Editar Banner de Aviso</h3>
-                <input type="text" id="textoBanner" placeholder="Digite a mensagem do banner..." style="width:100%; padding:12px; border:1px solid #ddd; border-radius:8px; box-sizing:border-box; font-size:1rem;">
-                <button onclick="salvarBanner()" style="margin-top:10px; background:#e91e63; color:white; padding:10px 20px; border:none; border-radius:8px; cursor:pointer; font-weight:bold;">💾 Salvar Banner</button>
-                <button onclick="document.getElementById('banner-aviso').style.display='none'" style="margin-top:10px; margin-left:10px; background:#aaa; color:white; padding:10px 20px; border:none; border-radius:8px; cursor:pointer;">🙈 Ocultar Banner</button>
-                <button onclick="document.getElementById('banner-aviso').style.display='flex'" style="margin-top:10px; margin-left:10px; background:#25d366; color:white; padding:10px 20px; border:none; border-radius:8px; cursor:pointer;">👁️ Mostrar Banner</button>
-            </div>
-
-            <!-- CADASTRO DE PRODUTO -->
-            <form id="doceForm">
-                <input type="text" id="nome" placeholder="Nome do Produto" required>
-                <input type="number" id="preco" placeholder="Preço" step="0.01" required>
-                <input type="url" id="urlImagem" placeholder="Link da Imagem" required>
-                <select id="categoria" required>
-                    <option value="" disabled selected>Selecione a Categoria</option>
-                    <option value="PROMOCAO">🔥 Promoção</option>
-                    <option value="DOCES">Doces</option>
-                    <option value="BALAS DE COCO">Balas de Coco</option>
-                    <option value="OVOS DE PASCOA">Ovos de Páscoa</option>
-                    <option value="BOLOS">Bolos</option>
-                    <option value="SALGADOS">Salgados</option>
-                </select>
-                <button type="submit" style="background: #25d366; color: white; padding: 10px; border: none; cursor: pointer; border-radius: 5px;">Salvar na Nuvem</button>
-            </form>
-
-            <!-- NOVA ÁREA DE PEDIDOS NO ADMIN -->
-            <div style="margin-top:30px; background:#fff; border:1px solid #ddd; border-radius:10px; padding:15px;">
-                <h3 style="color:var(--marrom-doce);">📋 Pedidos Recebidos</h3>
-                <div id="lista-pedidos-admin" style="display: flex; flex-direction: column; gap: 10px;">
-                    <!-- Pedidos aparecerão aqui em tempo real -->
-                </div>
-            </div>
-        </section>
-
-        <!-- VITRINES — ocultas por padrão, reveladas ao clicar em "Saiba mais" -->
-        <div id="secao-promocoes" class="categoria-vitrine vitrine-promocao">
-            <h3 class="titulo-categoria titulo-promocao">🔥 Promoções da Semana</h3>
-            <div id="listaPromocoes" class="grid"></div>
-        </div>
-
-        <div id="secao-salgados" class="categoria-vitrine">
-            <h3 class="titulo-categoria">🥐 Salgados</h3>
-            <div id="listaSalgados" class="grid"></div>
-        </div>
-
-        <div id="secao-bolos" class="categoria-vitrine">
-            <h3 class="titulo-categoria">🍰 Bolos</h3>
-            <div id="listaBolos" class="grid"></div>
-        </div>
-
-        <div id="secao-doces" class="categoria-vitrine">
-            <h3 class="titulo-categoria">🍬 Doces</h3>
-            <div id="listaDoces" class="grid"></div>
-        </div>
-
-        <div id="secao-balas" class="categoria-vitrine">
-            <h3 class="titulo-categoria">🥥 Balas de Coco</h3>
-            <div id="listaBalas" class="grid"></div>
-        </div>
-
-        <div id="secao-ovos" class="categoria-vitrine">
-            <h3 class="titulo-categoria">🍫 Ovos de Páscoa</h3>
-            <div id="listaOvos" class="grid"></div>
-        </div>
+        <div id="secao-promocoes" class="categoria-vitrine"><h3 class="titulo-categoria">🔥 Promoções</h3><div id="listaPromocoes" class="grid"></div></div>
+        <div id="secao-doces" class="categoria-vitrine"><h3 class="titulo-categoria">🍬 Doces</h3><div id="listaDoces" class="grid"></div></div>
+        <div id="secao-balas" class="categoria-vitrine"><h3 class="titulo-categoria">🥥 Balas de Coco</h3><div id="listaBalas" class="grid"></div></div>
+        <div id="secao-ovos" class="categoria-vitrine"><h3 class="titulo-categoria">🍫 Ovos de Páscoa</h3><div id="listaOvos" class="grid"></div></div>
+        <div id="secao-bolos" class="categoria-vitrine"><h3 class="titulo-categoria">🍰 Bolos</h3><div id="listaBolos" class="grid"></div></div>
+        <div id="secao-salgados" class="categoria-vitrine"><h3 class="titulo-categoria">🥐 Salgados</h3><div id="listaSalgados" class="grid"></div></div>
     </main>
 
-    <!-- FIREBASE CONFIG ATUALIZADO -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        // Adicionado serverTimestamp e updateDoc para gerenciar pedidos
-        import { getFirestore, collection, addDoc, onSnapshot, deleteDoc, doc, query, orderBy, setDoc, getDoc, serverTimestamp, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, onSnapshot, doc, query, orderBy, getDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyDz8gIhzGwn4oxTqVbg00ooaaGwneON0FA",
@@ -192,11 +116,8 @@
         };
 
         const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-
-        window.db = db;
-        // Exportando métodos para o script.js
-        window.dbMetodos = { collection, addDoc, onSnapshot, deleteDoc, doc, query, orderBy, setDoc, getDoc, serverTimestamp, updateDoc };
+        window.db = getFirestore(app);
+        window.dbMetodos = { collection, addDoc, onSnapshot, doc, query, orderBy, getDoc, serverTimestamp };
     </script>
     <script src="script.js"></script>
 </body>
