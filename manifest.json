@@ -1,0 +1,15 @@
+{
+  "name": "Delícias da Tia Rose",
+  "short_name": "Tia Rose",
+  "start_url": "index.html",
+  "display": "standalone",
+  "background_color": "#fdf6f0",
+  "theme_color": "#c9415a",
+  "icons": [
+    {
+      "src": "logo.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

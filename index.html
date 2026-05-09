@@ -1,6 +1,11 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
+    <link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#c9415a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Tia Rose">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Delícias da Tia Rose</title>
@@ -241,5 +246,12 @@
         window.dbMetodos = { collection, addDoc, onSnapshot, deleteDoc, doc, query, orderBy, setDoc, getDoc, serverTimestamp, updateDoc };
     </script>
     <script src="script.js"></script>
+    <script>
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('service-worker.js')
+      .then(() => console.log('App da Tia Rose pronto!'))
+      .catch(err => console.log('Erro no registro:', err));
+  }
+</script>
 </body>
 </html>
