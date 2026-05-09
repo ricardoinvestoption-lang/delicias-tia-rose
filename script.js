@@ -238,7 +238,7 @@ document.addEventListener('DOMContentLoaded', () => {
     inicializarSwipe();
 
     // =============================================
-    // 4. BOTÕES "SAIBA MAIS" — TOGGLE VITRINE
+    // 4. BOTÕES "SAIBA MAIS" — CORRIGIDO
     // =============================================
     document.querySelectorAll('.btn-filtro').forEach(btn => {
         btn.addEventListener('click', () => {
@@ -246,15 +246,23 @@ document.addEventListener('DOMContentLoaded', () => {
             const elemento = document.getElementById(targetId);
             if (!elemento) return;
 
+            // Se for a seção "Nesta Semana" (promoções), apenas rola até ela sem esconder
+            if (targetId === 'secao-promocoes') {
+                elemento.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                return;
+            }
+
+            // Para as outras seções, mantém o comportamento de toggle
             const jaAberto = elemento.classList.contains('visivel');
             if (jaAberto) {
                 elemento.classList.remove('visivel');
                 elemento.style.display = 'none';
             } else {
                 elemento.classList.add('visivel');
+                elemento.style.display = 'block';
                 setTimeout(() => {
-                    window.scrollTo({ top: elemento.offsetTop - 20, behavior: 'smooth' });
-                }, 50);
+                    elemento.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }, 100);
             }
         });
     });
@@ -268,6 +276,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const { collection, addDoc, onSnapshot, deleteDoc, doc, query, orderBy, setDoc, getDoc, updateDoc, serverTimestamp } = window.dbMetodos;
         const db = window.db;
         const produtosRef = collection(db, "produtos_v2");
+
+        // --- VARIÁVEIS PARA PRODUTOS DA SEMANA ---
+        let produtosIdsSemana = [];
 
         // --- BANNER ---
         async function carregarBanner() {
@@ -309,6 +320,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (cliques === 3) {
                 adminSection.style.display = 'block';
                 alert("Modo Administrativo Ativado!");
+                carregarListaProdutosAdmin();
                 inicializarVitrine();
                 cliques = 0;
             }
@@ -320,6 +332,98 @@ document.addEventListener('DOMContentLoaded', () => {
                 await deleteDoc(doc(db, "produtos_v2", id));
             }
         };
+
+        // --- CARREGAR PRODUTOS SALVOS DA SEMANA ---
+        async function carregarProdutosSemana() {
+            try {
+                const semanaDoc = await getDoc(doc(db, "configuracoes", "produtos_semana"));
+                if (semanaDoc.exists()) {
+                    produtosIdsSemana = semanaDoc.data().produtosIds || [];
+                } else {
+                    produtosIdsSemana = [];
+                }
+            } catch (e) { console.error("Erro ao carregar produtos da semana:", e); }
+        }
+
+        // --- SALVAR PRODUTOS SELECIONADOS ---
+        window.salvarProdutosSemana = async function() {
+            const idsSelecionados = [];
+            document.querySelectorAll('.checkbox-produto-semana:checked').forEach(cb => {
+                idsSelecionados.push(cb.value);
+            });
+            
+            if (idsSelecionados.length === 0) {
+                alert("Selecione pelo menos um produto para aparecer em 'Nesta Semana'");
+                return;
+            }
+            
+            try {
+                await setDoc(doc(db, "configuracoes", "produtos_semana"), {
+                    produtosIds: idsSelecionados,
+                    atualizadoEm: new Date()
+                });
+                produtosIdsSemana = idsSelecionados;
+                const statusSpan = document.getElementById('statusSemana');
+                if (statusSpan) {
+                    statusSpan.innerHTML = '✅ Salvo!';
+                    setTimeout(() => { if (statusSpan) statusSpan.innerHTML = ''; }, 2000);
+                }
+                inicializarVitrine();
+            } catch (e) { alert("Erro ao salvar seleção."); }
+        };
+
+        // --- CARREGAR LISTA DE PRODUTOS NO ADMIN ---
+        function carregarListaProdutosAdmin() {
+            const container = document.getElementById('lista-produtos-para-semana');
+            if (!container) return;
+            
+            const q = query(produtosRef, orderBy("categoria"), orderBy("dataCriacao", "desc"));
+            
+            onSnapshot(q, (snapshot) => {
+                container.innerHTML = '';
+                if (snapshot.empty) {
+                    container.innerHTML = '<p style="color:#aaa; text-align:center;">Nenhum produto cadastrado ainda.</p>';
+                    return;
+                }
+                
+                const porCategoria = {};
+                snapshot.forEach(docSnap => {
+                    const p = docSnap.data();
+                    const cat = p.categoria || 'OUTROS';
+                    if (!porCategoria[cat]) porCategoria[cat] = [];
+                    porCategoria[cat].push({ id: docSnap.id, ...p });
+                });
+                
+                for (const [categoria, produtos] of Object.entries(porCategoria)) {
+                    const catDiv = document.createElement('div');
+                    catDiv.style.marginBottom = '15px';
+                    catDiv.style.borderBottom = '1px solid #eee';
+                    catDiv.style.paddingBottom = '10px';
+                    
+                    const tituloCat = document.createElement('h4');
+                    tituloCat.style.margin = '0 0 8px 0';
+                    tituloCat.style.color = '#e91e63';
+                    tituloCat.textContent = `📁 ${categoria}`;
+                    catDiv.appendChild(tituloCat);
+                    
+                    produtos.forEach(p => {
+                        const precoFormatado = parseFloat(p.preco).toFixed(2).replace('.', ',');
+                        const label = document.createElement('label');
+                        label.className = 'checkbox-produto-item';
+                        label.innerHTML = `
+                            <input type="checkbox" class="checkbox-produto-semana" value="${p.id}" ${produtosIdsSemana.includes(p.id) ? 'checked' : ''}>
+                            <img src="${p.urlImagem}" onerror="this.src='https://via.placeholder.com/40'">
+                            <div class="info">
+                                <div class="nome">${p.nome}</div>
+                                <div class="preco">R$ ${precoFormatado}</div>
+                            </div>
+                        `;
+                        catDiv.appendChild(label);
+                    });
+                    container.appendChild(catDiv);
+                }
+            });
+        }
 
         // --- VITRINE ---
         function inicializarVitrine() {
@@ -335,35 +439,45 @@ document.addEventListener('DOMContentLoaded', () => {
             const q = query(produtosRef, orderBy("dataCriacao", "desc"));
 
             onSnapshot(q, (snapshot) => {
+                // Limpar todas as listas
                 Object.values(listas).forEach(id => {
                     const div = document.getElementById(id);
                     if (div) div.innerHTML = '';
                 });
 
+                const produtosPorCategoria = {};
+                const produtosPorId = {};
+                
                 snapshot.forEach((docSnap) => {
                     const p = docSnap.data();
                     const id = docSnap.id;
-                    const listaId = listas[p.categoria];
+                    const cat = p.categoria;
+                    if (!produtosPorCategoria[cat]) produtosPorCategoria[cat] = [];
+                    produtosPorCategoria[cat].push({ id, ...p });
+                    produtosPorId[id] = { id, ...p };
+                });
 
-                    if (listaId) {
-                        const container = document.getElementById(listaId);
-                        const card = document.createElement('div');
-                        card.className = 'card';
-                        card.style.position = 'relative';
+                const estaNoModoAdmin = adminSection.style.display === 'block';
 
-                        const estaNoModoAdmin = adminSection.style.display === 'block';
+                // Renderizar categorias fixas
+                for (const [categoria, listaId] of Object.entries(listas)) {
+                    const produtos = produtosPorCategoria[categoria] || [];
+                    const container = document.getElementById(listaId);
+                    if (!container) continue;
+                    
+                    produtos.forEach(p => {
+                        const precoFormatado = parseFloat(p.preco).toFixed(2).replace('.', ',');
+                        const nomeSeguro = p.nome.replace(/'/g, "\\'");
                         const btnExcluir = estaNoModoAdmin
-                            ? `<button class="btn-remover" onclick="excluirProduto('${id}')" style="position:absolute;top:5px;right:5px;background:red;color:white;border:none;border-radius:50%;width:25px;height:25px;cursor:pointer;z-index:10;">×</button>`
+                            ? `<button class="btn-remover" onclick="excluirProduto('${p.id}')" style="position:absolute;top:5px;right:5px;background:red;color:white;border:none;border-radius:50%;width:25px;height:25px;cursor:pointer;z-index:10;">×</button>`
                             : '';
-
                         const badgePromocao = p.categoria === 'PROMOCAO'
                             ? `<div style="background:#e91e63;color:white;font-size:0.75rem;font-weight:bold;padding:4px 10px;text-align:center;">🔥 PROMOÇÃO</div>`
                             : '';
 
-                        const precoFormatado = parseFloat(p.preco).toFixed(2).replace('.', ',');
-                        // Escapa aspas simples no nome para não quebrar o onclick
-                        const nomeSeguro = p.nome.replace(/'/g, "\\'");
-
+                        const card = document.createElement('div');
+                        card.className = 'card';
+                        card.style.position = 'relative';
                         card.innerHTML = `
                             ${btnExcluir}
                             ${badgePromocao}
@@ -380,14 +494,52 @@ document.addEventListener('DOMContentLoaded', () => {
                             </div>
                         `;
                         container.appendChild(card);
-                    }
-                });
+                    });
+                }
 
-                // Promoções sempre visíveis
-                const secaoPromocoes = document.getElementById('secao-promocoes');
-                if (secaoPromocoes) {
-                    secaoPromocoes.style.display = 'block';
-                    secaoPromocoes.classList.add('visivel');
+                // ========== RENDERIZAR "NESTA SEMANA" COM PRODUTOS SELECIONADOS ==========
+                const secaoSemana = document.getElementById('secao-promocoes');
+                const containerSemana = document.getElementById('listaPromocoes');
+                
+                if (secaoSemana && containerSemana) {
+                    containerSemana.innerHTML = '';
+                    
+                    const produtosSemana = produtosIdsSemana
+                        .map(id => produtosPorId[id])
+                        .filter(p => p !== undefined);
+                    
+                    if (produtosSemana.length === 0) {
+                        containerSemana.innerHTML = '<p style="text-align:center;color:#aaa;padding:40px;">Nenhum produto selecionado para esta semana. Acesse o modo Admin e escolha os produtos.</p>';
+                    } else {
+                        produtosSemana.forEach(p => {
+                            const precoFormatado = parseFloat(p.preco).toFixed(2).replace('.', ',');
+                            const nomeSeguro = p.nome.replace(/'/g, "\\'");
+                            const btnExcluir = estaNoModoAdmin
+                                ? `<button class="btn-remover" onclick="excluirProduto('${p.id}')" style="position:absolute;top:5px;right:5px;background:red;color:white;border:none;border-radius:50%;width:25px;height:25px;cursor:pointer;z-index:10;">×</button>`
+                                : '';
+                            
+                            const card = document.createElement('div');
+                            card.className = 'card';
+                            card.style.position = 'relative';
+                            card.innerHTML = `
+                                ${btnExcluir}
+                                <img src="${p.urlImagem}" alt="${p.nome}" onerror="this.src='https://via.placeholder.com/300x200?text=Sem+imagem'">
+                                <div style="padding:15px">
+                                    <h3 style="margin:0; font-size:1.1rem">${p.nome}</h3>
+                                    <p style="color:#8c6239; font-weight:bold; margin:10px 0">R$ ${precoFormatado}</p>
+                                    <button
+                                        class="btn-whats btn-adicionar-carrinho"
+                                        data-nome="${p.nome}"
+                                        onclick="adicionarAoCarrinho('${nomeSeguro}', '${p.preco}')">
+                                        🛒 Adicionar
+                                    </button>
+                                </div>
+                            `;
+                            containerSemana.appendChild(card);
+                        });
+                    }
+                    secaoSemana.style.display = 'block';
+                    secaoSemana.classList.add('visivel');
                 }
             });
         }
@@ -415,8 +567,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 btnSubmit.innerText = "Salvar na Nuvem";
             }
         });
-
-        inicializarVitrine();
 
         // --- GERENCIAR STATUS DE PEDIDO ---
         window.marcarComoEntregue = async (id) => {
@@ -557,6 +707,14 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
 
+        // --- INICIALIZAR TUDO ---
+        carregarProdutosSemana().then(() => {
+            inicializarVitrine();
+            // Botão salvar produtos
+            const btnSalvar = document.getElementById('btnSalvarProdutosSemana');
+            if (btnSalvar) btnSalvar.addEventListener('click', window.salvarProdutosSemana);
+        });
         monitorarPedidos();
+        
     }, 1200);
 });

@@ -149,6 +149,19 @@
                 <button onclick="document.getElementById('banner-aviso').style.display='flex'" style="margin-top:10px; margin-left:10px; background:#25d366; color:white; padding:10px 20px; border:none; border-radius:8px; cursor:pointer;">👁️ Mostrar Banner</button>
             </div>
 
+            <!-- NOVA ÁREA: SELEÇÃO DE PRODUTOS PARA NESTA SEMANA -->
+            <div style="background:#fff0f5; border:1px solid #e91e63; border-radius:10px; padding:15px; margin-bottom:20px;">
+                <h3 style="margin:0 0 10px; color:#c2185b;">📅 Selecione os PRODUTOS em destaque nesta semana</h3>
+                <p style="font-size:0.85rem; color:#666;">Marque os produtos específicos que vão aparecer no card "NESTA SEMANA" (ex: 3 doces + 2 salgados)</p>
+                
+                <div id="lista-produtos-para-semana" style="max-height:350px; overflow-y:auto; border:1px solid #ddd; border-radius:8px; padding:10px; background:white; margin:10px 0;">
+                    <p style="color:#aaa; text-align:center;">Carregando produtos...</p>
+                </div>
+                
+                <button id="btnSalvarProdutosSemana" style="background:#e91e63; color:white; padding:10px 20px; border:none; border-radius:8px; cursor:pointer; font-weight:bold;">💾 Salvar produtos da semana</button>
+                <span id="statusSemana" style="margin-left:12px; font-size:0.85rem;"></span>
+            </div>
+
             <!-- CADASTRO DE PRODUTO -->
             <form id="doceForm">
                 <input type="text" id="nome" placeholder="Nome do Produto" required>
@@ -177,7 +190,7 @@
 
         <!-- VITRINES — ocultas por padrão, reveladas ao clicar em "Saiba mais" -->
         <div id="secao-promocoes" class="categoria-vitrine vitrine-promocao">
-            <h3 class="titulo-categoria titulo-promocao">🔥 Promoções da Semana</h3>
+            <h3 class="titulo-categoria titulo-promocao">🔥 Nesta Semana</h3>
             <div id="listaPromocoes" class="grid"></div>
         </div>
 
