@@ -314,15 +314,118 @@ document.addEventListener('DOMContentLoaded', () => {
         const adminSection = document.getElementById('admin-section');
         let cliques = 0;
 
+        // --- MODAL DE SENHA ADMIN ---
+        const senhaCorreta = "5060"; // 🔑 Altere aqui para a sua senha de 4 dígitos
+
+        // Cria o modal de senha dinamicamente
+        const modalSenha = document.createElement('div');
+        modalSenha.id = 'modal-senha-admin';
+        modalSenha.style = `
+            display: none;
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.55);
+            z-index: 9999;
+            justify-content: center;
+            align-items: center;
+        `;
+        modalSenha.innerHTML = `
+            <div style="
+                background: white;
+                border-radius: 16px;
+                padding: 32px 28px;
+                text-align: center;
+                box-shadow: 0 8px 32px rgba(0,0,0,0.25);
+                max-width: 300px;
+                width: 90%;
+            ">
+                <div style="font-size: 2rem; margin-bottom: 8px;">🔒</div>
+                <h3 style="margin: 0 0 6px; color: #c2185b; font-size: 1.1rem;">Área Administrativa</h3>
+                <p style="margin: 0 0 18px; color: #888; font-size: 0.88rem;">Digite a senha de 4 dígitos</p>
+                <input
+                    id="input-senha-admin"
+                    type="password"
+                    inputmode="numeric"
+                    maxlength="4"
+                    pattern="[0-9]*"
+                    placeholder="• • • •"
+                    style="
+                        width: 100%;
+                        padding: 12px;
+                        font-size: 1.6rem;
+                        letter-spacing: 0.5rem;
+                        text-align: center;
+                        border: 2px solid #ddd;
+                        border-radius: 10px;
+                        outline: none;
+                        box-sizing: border-box;
+                        margin-bottom: 6px;
+                    "
+                />
+                <p id="msg-senha-errada" style="color: #e91e63; font-size: 0.85rem; min-height: 20px; margin: 4px 0 14px;"></p>
+                <div style="display: flex; gap: 10px;">
+                    <button id="btn-cancelar-senha" style="
+                        flex: 1; padding: 11px; border: 1.5px solid #ddd;
+                        border-radius: 10px; background: white; color: #888;
+                        font-size: 0.95rem; cursor: pointer;
+                    ">Cancelar</button>
+                    <button id="btn-confirmar-senha" style="
+                        flex: 1; padding: 11px; border: none;
+                        border-radius: 10px; background: #e91e63; color: white;
+                        font-size: 0.95rem; font-weight: bold; cursor: pointer;
+                    ">Entrar</button>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modalSenha);
+
+        function abrirModalSenha() {
+            const input = document.getElementById('input-senha-admin');
+            const msg = document.getElementById('msg-senha-errada');
+            input.value = '';
+            msg.textContent = '';
+            input.style.border = '2px solid #ddd';
+            modalSenha.style.display = 'flex';
+            setTimeout(() => input.focus(), 150);
+        }
+
+        function fecharModalSenha() {
+            modalSenha.style.display = 'none';
+            cliques = 0;
+        }
+
+        function verificarSenha() {
+            const input = document.getElementById('input-senha-admin');
+            const msg = document.getElementById('msg-senha-errada');
+            if (input.value === senhaCorreta) {
+                fecharModalSenha();
+                adminSection.style.display = 'block';
+                carregarListaProdutosAdmin();
+                inicializarVitrine();
+            } else {
+                input.style.border = '2px solid #e91e63';
+                msg.textContent = '❌ Senha incorreta. Tente novamente.';
+                input.value = '';
+                setTimeout(() => input.focus(), 100);
+            }
+        }
+
+        document.getElementById('btn-confirmar-senha').addEventListener('click', verificarSenha);
+        document.getElementById('btn-cancelar-senha').addEventListener('click', fecharModalSenha);
+        document.getElementById('input-senha-admin').addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') verificarSenha();
+        });
+        // Fecha ao clicar fora da caixa
+        modalSenha.addEventListener('click', (e) => {
+            if (e.target === modalSenha) fecharModalSenha();
+        });
+
         // --- MODO ADMIN (3 cliques no título) ---
         document.getElementById('titulo-principal').addEventListener('click', () => {
             cliques++;
             if (cliques === 3) {
-                adminSection.style.display = 'block';
-                alert("Modo Administrativo Ativado!");
-                carregarListaProdutosAdmin();
-                inicializarVitrine();
-                cliques = 0;
+                abrirModalSenha();
             }
         });
 
