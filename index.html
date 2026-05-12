@@ -1,14 +1,17 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#c9415a">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Tia Rose">
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
     <title>Delícias da Tia Rose</title>
+
+    <!-- PWA -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#c9415a">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Tia Rose">
+
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -23,8 +26,8 @@
                 <p style="margin:0 0 14px; font-size:0.9rem; color:#666;">Digite seu nome para enviar o pedido pelo WhatsApp:</p>
                 <input type="text" id="modal-input-nome" placeholder="Seu nome completo..." autocomplete="name" />
                 <div id="modal-botoes">
-                    <button id="modal-btn-cancelar" onclick="fecharModalPedido()">Cancelar</button>
-                    <button id="modal-btn-confirmar" onclick="confirmarPedido()">Enviar no WhatsApp ✅</button>
+                    <button id="modal-btn-cancelar">Cancelar</button>
+                    <button id="modal-btn-confirmar">Enviar no WhatsApp ✅</button>
                 </div>
             </div>
         </div>
@@ -35,7 +38,7 @@
         <div id="modal-carrinho-box">
             <div id="modal-carrinho-header">
                 <span>🛒 Meu Carrinho</span>
-                <button id="fechar-carrinho" onclick="fecharCarrinho()">✕</button>
+                <button id="fechar-carrinho">✕</button>
             </div>
             <div id="modal-carrinho-body">
                 <div id="carrinho-lista"></div>
@@ -50,13 +53,13 @@
                     <span>Total do pedido:</span>
                     <span id="carrinho-total-valor">R$ 0,00</span>
                 </div>
-                <button id="btn-finalizar-pedido" onclick="abrirModalNome()">Pedir no WhatsApp 🚀</button>
+                <button id="btn-finalizar-pedido">Pedir no WhatsApp 🚀</button>
             </div>
         </div>
     </div>
 
     <!-- BOTÃO FLUTUANTE DO CARRINHO -->
-    <button id="btn-carrinho-flutuante" onclick="abrirCarrinho()">
+    <button id="btn-carrinho-flutuante">
         🛒
         <span id="carrinho-contador">0</span>
     </button>
@@ -65,7 +68,7 @@
     <div id="banner-aviso">
         <span>📢</span>
         <span id="texto-aviso">Faça suas encomendas até quinta-feira ! 🌸</span>
-        <button id="fechar-aviso" onclick="document.getElementById('banner-aviso').style.display='none'">✕</button>
+        <button id="fechar-aviso">✕</button>
     </div>
 
     <header>
@@ -77,13 +80,10 @@
         <h2 class="titulo-sessao">Conheça todos os nossos sabores</h2>
         
         <div class="carrossel-wrapper">
-            <!-- Setas de Navegação -->
-            <button class="seta seta-esq" onclick="scrollMenu(-1)">&#10094;</button>
-            <button class="seta seta-dir" onclick="scrollMenu(1)">&#10095;</button>
+            <button class="seta seta-esq" id="seta-esq">&#10094;</button>
+            <button class="seta seta-dir" id="seta-dir">&#10095;</button>
 
-            <!-- Carrossel -->
             <div class="carrossel-scroll" id="menuCarrossel">
-
                 <div class="card-categoria card-promocao" style="background-image: linear-gradient(to top, rgba(139,0,0,0.85), transparent), url('https://i.postimg.cc/PJDfvv8q/estasemanatem.jpg');">
                     <div class="info-card">
                         <span class="badge-promocao">🔥 Nesta Semana</span>
@@ -127,37 +127,29 @@
                         <button class="btn-filtro" data-target="secao-salgados">Saiba mais</button>
                     </div>
                 </div>
+            </div>
 
-            </div><!-- fim carrossel-scroll -->
-
-            <!-- Bolinhas indicadoras de página -->
             <div class="carrossel-indicadores" id="indicadoresCarrossel"></div>
+        </div>
 
-        </div><!-- fim carrossel-wrapper -->
-
-        <!-- Dica de navegação -->
         <p class="hint-deslize">👆 Deslize ou use as setas para ver mais categorias</p>
-
     </section>
 
     <main class="container">
-        <!-- ÁREA DE CADASTRO (ADMIN) -->
         <section id="admin-section" style="display: none; padding: 20px; background: #fff; border-radius: 15px; margin-bottom: 30px;">
             <h2>Painel de Controle - Tia Rose</h2>
 
-            <!-- EDIÇÃO DO BANNER -->
             <div style="background:#fff0f5; border:1px solid #e91e63; border-radius:10px; padding:15px; margin-bottom:20px;">
                 <h3 style="margin:0 0 10px; color:#c2185b;">📢 Editar Banner de Aviso</h3>
                 <input type="text" id="textoBanner" placeholder="Digite a mensagem do banner..." style="width:100%; padding:12px; border:1px solid #ddd; border-radius:8px; box-sizing:border-box; font-size:1rem;">
-                <button onclick="salvarBanner()" style="margin-top:10px; background:#e91e63; color:white; padding:10px 20px; border:none; border-radius:8px; cursor:pointer; font-weight:bold;">💾 Salvar Banner</button>
-                <button onclick="document.getElementById('banner-aviso').style.display='none'" style="margin-top:10px; margin-left:10px; background:#aaa; color:white; padding:10px 20px; border:none; border-radius:8px; cursor:pointer;">🙈 Ocultar Banner</button>
-                <button onclick="document.getElementById('banner-aviso').style.display='flex'" style="margin-top:10px; margin-left:10px; background:#25d366; color:white; padding:10px 20px; border:none; border-radius:8px; cursor:pointer;">👁️ Mostrar Banner</button>
+                <button id="salvarBannerBtn" style="margin-top:10px; background:#e91e63; color:white; padding:10px 20px; border:none; border-radius:8px; cursor:pointer; font-weight:bold;">💾 Salvar Banner</button>
+                <button id="ocultarBannerBtn" style="margin-top:10px; margin-left:10px; background:#aaa; color:white; padding:10px 20px; border:none; border-radius:8px; cursor:pointer;">🙈 Ocultar Banner</button>
+                <button id="mostrarBannerBtn" style="margin-top:10px; margin-left:10px; background:#25d366; color:white; padding:10px 20px; border:none; border-radius:8px; cursor:pointer;">👁️ Mostrar Banner</button>
             </div>
 
-            <!-- NOVA ÁREA: SELEÇÃO DE PRODUTOS PARA NESTA SEMANA -->
             <div style="background:#fff0f5; border:1px solid #e91e63; border-radius:10px; padding:15px; margin-bottom:20px;">
                 <h3 style="margin:0 0 10px; color:#c2185b;">📅 Selecione os PRODUTOS em destaque nesta semana</h3>
-                <p style="font-size:0.85rem; color:#666;">Marque os produtos específicos que vão aparecer no card "NESTA SEMANA" (ex: 3 doces + 2 salgados)</p>
+                <p style="font-size:0.85rem; color:#666;">Marque os produtos específicos que vão aparecer no card "NESTA SEMANA"</p>
                 
                 <div id="lista-produtos-para-semana" style="max-height:350px; overflow-y:auto; border:1px solid #ddd; border-radius:8px; padding:10px; background:white; margin:10px 0;">
                     <p style="color:#aaa; text-align:center;">Carregando produtos...</p>
@@ -167,7 +159,6 @@
                 <span id="statusSemana" style="margin-left:12px; font-size:0.85rem;"></span>
             </div>
 
-            <!-- CADASTRO DE PRODUTO -->
             <form id="doceForm">
                 <input type="text" id="nome" placeholder="Nome do Produto" required>
                 <input type="number" id="preco" placeholder="Preço" step="0.01" required>
@@ -184,16 +175,12 @@
                 <button type="submit" style="background: #25d366; color: white; padding: 10px; border: none; cursor: pointer; border-radius: 5px;">Salvar na Nuvem</button>
             </form>
 
-            <!-- ÁREA DE PEDIDOS NO ADMIN -->
             <div style="margin-top:30px; background:#fff; border:1px solid #ddd; border-radius:10px; padding:15px;">
                 <h3 style="color:var(--marrom-doce);">📋 Pedidos Recebidos</h3>
-                <div id="lista-pedidos-admin" style="display: flex; flex-direction: column; gap: 10px;">
-                    <!-- Pedidos aparecerão aqui em tempo real -->
-                </div>
+                <div id="lista-pedidos-admin" style="display: flex; flex-direction: column; gap: 10px;"></div>
             </div>
         </section>
 
-        <!-- VITRINES — ocultas por padrão, reveladas ao clicar em "Saiba mais" -->
         <div id="secao-promocoes" class="categoria-vitrine vitrine-promocao">
             <h3 class="titulo-categoria titulo-promocao">🔥 Nesta Semana</h3>
             <div id="listaPromocoes" class="grid"></div>
@@ -225,7 +212,7 @@
         </div>
     </main>
 
-    <!-- FIREBASE CONFIG -->
+    <!-- FIREBASE CONFIG (carregado primeiro) -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getFirestore, collection, addDoc, onSnapshot, deleteDoc, doc, query, orderBy, setDoc, getDoc, serverTimestamp, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
@@ -242,16 +229,25 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
+        // Disponibilizar globalmente
         window.db = db;
         window.dbMetodos = { collection, addDoc, onSnapshot, deleteDoc, doc, query, orderBy, setDoc, getDoc, serverTimestamp, updateDoc };
+        
+        // Disparar evento para indicar que Firebase está pronto
+        window.dispatchEvent(new CustomEvent('firebase-ready'));
     </script>
-    <script src="script.js?v=2"></script>
+
+    <!-- Script principal (carregado após Firebase) -->
+    <script src="script.js"></script>
+
+    <!-- Service Worker -->
     <script>
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('service-worker.js')
-      .then(() => console.log('App da Tia Rose pronto!'))
-      .catch(err => console.log('Erro no registro:', err));
-  }
-</script>
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('service-worker.js')
+                .then(() => console.log('App da Tia Rose pronto!'))
+                .catch(err => console.log('Erro no registro:', err));
+        }
+    </script>
+
 </body>
 </html>

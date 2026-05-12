@@ -1,71 +1,94 @@
 // =============================================
 // SERVICE WORKER — Delícias da Tia Rose
 // ⚠️ Sempre que atualizar o site, mude o número
-//    da versão aqui (CACHE_VERSION) para forçar
-//    todos os navegadores a baixar os arquivos novos
+// da versão aqui (CACHE_VERSION) para forçar
+// todos os navegadores a baixar os arquivos novos
 // =============================================
 
-const CACHE_VERSION = 'tia-rose-v2';
+const CACHE_VERSION = 'tia-rose-v4';
 
 const ARQUIVOS_CACHE = [
-    '/',
-    '/index.html',
-    '/style.css',
-    '/script.js?v=2',
-    '/logo.png',
-    '/manifest.json'
+  '/',
+  '/index.html',
+  '/style.css',
+  '/script.js',
+  '/logo.png',
+  '/manifest.json'
 ];
 
 // Instalação: salva os arquivos no cache
 self.addEventListener('install', (event) => {
-    event.waitUntil(
-        caches.open(CACHE_VERSION).then((cache) => {
-            return cache.addAll(ARQUIVOS_CACHE);
-        })
-    );
-    self.skipWaiting(); // Ativa imediatamente sem esperar
+  console.log('Service Worker: Installing...');
+  event.waitUntil(
+    caches.open(CACHE_VERSION).then((cache) => {
+      console.log('Service Worker: Caching app shell...');
+      return Promise.allSettled(
+        ARQUIVOS_CACHE.map(url => cache.add(url).catch(err => {
+          console.warn('Cache: não foi possível armazenar', url, err);
+        }))
+      );
+    })
+  );
+  self.skipWaiting();
 });
 
 // Ativação: apaga caches antigos
 self.addEventListener('activate', (event) => {
-    event.waitUntil(
-        caches.keys().then((nomes) => {
-            return Promise.all(
-                nomes
-                    .filter((nome) => nome !== CACHE_VERSION)
-                    .map((nome) => {
-                        console.log('🗑️ Cache antigo removido:', nome);
-                        return caches.delete(nome);
-                    })
-            );
-        })
-    );
-    self.clients.claim(); // Assume controle de todas as abas
+  console.log('Service Worker: Activating...');
+  event.waitUntil(
+    caches.keys().then((nomes) => {
+      return Promise.all(
+        nomes
+          .filter((nome) => nome !== CACHE_VERSION)
+          .map((nome) => {
+            console.log('🗑️ Cache antigo removido:', nome);
+            return caches.delete(nome);
+          })
+      );
+    })
+  );
+  self.clients.claim();
 });
 
-// Requisições: tenta a rede primeiro, usa cache como fallback
+// Requisições: estratégia cache-first com atualização em segundo plano
 self.addEventListener('fetch', (event) => {
-    // Ignora requisições do Firebase (sempre precisam da rede)
-    if (event.request.url.includes('firebase') ||
-        event.request.url.includes('firestore') ||
-        event.request.url.includes('googleapis') ||
-        event.request.url.includes('gstatic')) {
-        return;
-    }
 
-    event.respondWith(
-        fetch(event.request)
-            .then((resposta) => {
-                // Atualiza o cache com a versão mais recente
-                const respostaClone = resposta.clone();
-                caches.open(CACHE_VERSION).then((cache) => {
-                    cache.put(event.request, respostaClone);
-                });
-                return resposta;
-            })
-            .catch(() => {
-                // Sem internet: usa o cache
-                return caches.match(event.request);
-            })
-    );
+  const url = event.request.url;
+  if (
+    url.includes('firebase') ||
+    url.includes('firestore') ||
+    url.includes('googleapis') ||
+    url.includes('gstatic') ||
+    url.includes('postimg') ||
+    url.includes('via.placeholder')
+  ) {
+    return;
+  }
+
+  if (event.request.method !== 'GET') return;
+
+  event.respondWith(
+    caches.open(CACHE_VERSION).then((cache) => {
+      return cache.match(event.request).then((cachedResponse) => {
+
+        const networkFetch = fetch(event.request).then((response) => {
+          if (response && response.ok && response.type === 'basic') {
+            cache.put(event.request, response.clone());
+          }
+          return response;
+        }).catch(() => {
+          return cachedResponse;
+        });
+
+        return cachedResponse || networkFetch;
+      });
+    })
+  );
+});
+
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'SKIP_WAITING') {
+    self.skipWaiting();
+    console.log('Service Worker: tomando controle imediatamente.');
+  }
 });

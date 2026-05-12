@@ -1,20 +1,20 @@
+// =============================================
+// SCRIPT PRINCIPAL - Delícias da Tia Rose
+// =============================================
+
 document.addEventListener('DOMContentLoaded', () => {
 
     // =============================================
     // 1. CARRINHO DE COMPRAS
     // =============================================
-    let carrinho = []; // [{ nome, preco, quantidade }]
+    let carrinho = [];
 
     function atualizarContador() {
         const total = carrinho.reduce((acc, item) => acc + item.quantidade, 0);
         const contador = document.getElementById('carrinho-contador');
         const btn = document.getElementById('btn-carrinho-flutuante');
-        contador.textContent = total;
-        if (total > 0) {
-            btn.style.display = 'flex';
-        } else {
-            btn.style.display = 'none';
-        }
+        if (contador) contador.textContent = total;
+        if (btn) btn.style.display = total > 0 ? 'flex' : 'none';
     }
 
     function calcularTotal() {
@@ -30,16 +30,17 @@ document.addEventListener('DOMContentLoaded', () => {
         const vazio = document.getElementById('carrinho-vazio');
         const footer = document.getElementById('modal-carrinho-footer');
 
+        if (!lista) return;
         lista.innerHTML = '';
 
         if (carrinho.length === 0) {
-            vazio.style.display = 'block';
-            footer.style.display = 'none';
+            if (vazio) vazio.style.display = 'block';
+            if (footer) footer.style.display = 'none';
             return;
         }
 
-        vazio.style.display = 'none';
-        footer.style.display = 'block';
+        if (vazio) vazio.style.display = 'none';
+        if (footer) footer.style.display = 'block';
 
         carrinho.forEach((item, index) => {
             const subtotal = item.preco * item.quantidade;
@@ -47,23 +48,37 @@ document.addEventListener('DOMContentLoaded', () => {
             div.className = 'carrinho-item';
             div.innerHTML = `
                 <div class="carrinho-item-info">
-                    <span class="carrinho-item-nome">${item.nome}</span>
+                    <span class="carrinho-item-nome">${escapeHtml(item.nome)}</span>
                     <span class="carrinho-item-unitario">
                         ${formatarMoeda(item.preco)} × ${item.quantidade} = 
                         <strong>${formatarMoeda(subtotal)}</strong>
                     </span>
                 </div>
                 <div class="carrinho-item-controles">
-                    <button class="btn-qtd" onclick="alterarQuantidade(${index}, -1)">−</button>
+                    <button class="btn-qtd" data-index="${index}" data-delta="-1">−</button>
                     <span class="carrinho-item-qtd">${item.quantidade}</span>
-                    <button class="btn-qtd" onclick="alterarQuantidade(${index}, 1)">+</button>
-                    <button class="btn-remover-item" onclick="removerItem(${index})" title="Remover">🗑️</button>
+                    <button class="btn-qtd" data-index="${index}" data-delta="1">+</button>
+                    <button class="btn-remover-item" data-index="${index}" title="Remover">🗑️</button>
                 </div>
             `;
             lista.appendChild(div);
         });
 
-        // Linha separadora + total
+        // Event delegation para os botões
+        lista.querySelectorAll('.btn-qtd').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const index = parseInt(btn.dataset.index);
+                const delta = parseInt(btn.dataset.delta);
+                alterarQuantidade(index, delta);
+            });
+        });
+        lista.querySelectorAll('.btn-remover-item').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const index = parseInt(btn.dataset.index);
+                removerItem(index);
+            });
+        });
+
         const totalDiv = document.createElement('div');
         totalDiv.className = 'carrinho-resumo';
         totalDiv.innerHTML = `
@@ -72,26 +87,27 @@ document.addEventListener('DOMContentLoaded', () => {
         `;
         lista.appendChild(totalDiv);
 
-        // Atualiza o total no footer também
-        document.getElementById('carrinho-total-valor').textContent = formatarMoeda(calcularTotal());
+        const totalValor = document.getElementById('carrinho-total-valor');
+        if (totalValor) totalValor.textContent = formatarMoeda(calcularTotal());
     }
 
-    window.alterarQuantidade = (index, delta) => {
+    function alterarQuantidade(index, delta) {
+        if (!carrinho[index]) return;
         carrinho[index].quantidade += delta;
         if (carrinho[index].quantidade <= 0) {
             carrinho.splice(index, 1);
         }
         atualizarContador();
         renderizarCarrinho();
-    };
+    }
 
-    window.removerItem = (index) => {
+    function removerItem(index) {
         carrinho.splice(index, 1);
         atualizarContador();
         renderizarCarrinho();
-    };
+    }
 
-    window.adicionarAoCarrinho = (nome, preco) => {
+    window.adicionarAoCarrinho = function(nome, preco) {
         const existente = carrinho.find(i => i.nome === nome);
         if (existente) {
             existente.quantidade++;
@@ -100,7 +116,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         atualizarContador();
 
-        // Feedback visual em TODOS os botões desse produto (pode ter em promoção + vitrine)
         document.querySelectorAll('.btn-adicionar-carrinho').forEach(btn => {
             if (btn.getAttribute('data-nome') === nome) {
                 const textoOriginal = btn.textContent;
@@ -114,91 +129,98 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     };
 
-    window.abrirCarrinho = () => {
+    function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    // =============================================
+    // 2. MODAIS
+    // =============================================
+    function abrirCarrinho() {
         renderizarCarrinho();
-        document.getElementById('modal-carrinho').style.display = 'flex';
-    };
+        const modal = document.getElementById('modal-carrinho');
+        if (modal) modal.style.display = 'flex';
+    }
 
-    window.fecharCarrinho = () => {
-        document.getElementById('modal-carrinho').style.display = 'none';
-    };
+    function fecharCarrinho() {
+        const modal = document.getElementById('modal-carrinho');
+        if (modal) modal.style.display = 'none';
+    }
 
-    // Fecha ao clicar fora do box
-    document.getElementById('modal-carrinho').addEventListener('click', (e) => {
-        if (e.target.id === 'modal-carrinho') fecharCarrinho();
-    });
-
-    // =============================================
-    // 2. MODAL DE NOME / CONFIRMAR PEDIDO
-    // =============================================
-    window.abrirModalNome = () => {
+    function abrirModalNome() {
         if (carrinho.length === 0) return;
         fecharCarrinho();
-        document.getElementById('modal-input-nome').value = '';
-        document.getElementById('modal-input-nome').style.border = '1.5px solid #ddd';
-        document.getElementById('modal-pedido').style.display = 'flex';
-        setTimeout(() => document.getElementById('modal-input-nome').focus(), 100);
-    };
+        const input = document.getElementById('modal-input-nome');
+        if (input) {
+            input.value = '';
+            input.style.border = '1.5px solid #ddd';
+        }
+        const modal = document.getElementById('modal-pedido');
+        if (modal) {
+            modal.style.display = 'flex';
+            setTimeout(() => input && input.focus(), 100);
+        }
+    }
 
-    window.fecharModalPedido = () => {
-        document.getElementById('modal-pedido').style.display = 'none';
-    };
+    function fecharModalPedido() {
+        const modal = document.getElementById('modal-pedido');
+        if (modal) modal.style.display = 'none';
+    }
 
-    window.confirmarPedido = () => {
-        const nomeCliente = document.getElementById('modal-input-nome').value.trim();
+    async function confirmarPedido() {
+        const nomeCliente = document.getElementById('modal-input-nome')?.value.trim();
         if (!nomeCliente) {
-            document.getElementById('modal-input-nome').style.border = '2px solid #e91e63';
+            const input = document.getElementById('modal-input-nome');
+            if (input) input.style.border = '2px solid #e91e63';
             return;
         }
 
-        // Monta a mensagem com todos os itens
         const linhas = carrinho.map(item =>
             `• ${item.quantidade}x ${item.nome} — ${formatarMoeda(item.preco * item.quantidade)}`
         );
         const total = calcularTotal();
-        const mensagem =
-            `Olá Rose! Eu sou *${nomeCliente}* e gostaria de fazer o seguinte pedido:\n\n` +
-            linhas.join('\n') +
-            `\n\n*Total: ${formatarMoeda(total)}*`;
+        const mensagem = `Olá Rose! Eu sou *${nomeCliente}* e gostaria de fazer o seguinte pedido:\n\n${linhas.join('\n')}\n\n*Total: ${formatarMoeda(total)}*`;
 
         const fone = "5516991839509";
-        // Abre o WhatsApp IMEDIATAMENTE (dentro do clique = sem bloqueio no mobile)
         window.location.href = `https://wa.me/${fone}?text=${encodeURIComponent(mensagem)}`;
 
         fecharModalPedido();
 
-        // Salva cada item no Firestore em background
-        if (window.dbMetodos && window.db) {
+        // Salvar no Firestore se disponível
+        if (window.db && window.dbMetodos) {
             const { collection, addDoc, serverTimestamp } = window.dbMetodos;
             const dataHora = serverTimestamp();
-            carrinho.forEach(item => {
-                addDoc(collection(window.db, "pedidos"), {
-                    cliente: nomeCliente,
-                    produto: `${item.quantidade}x ${item.nome}`,
-                    valor: (item.preco * item.quantidade).toFixed(2),
-                    status: "novo",
-                    data: dataHora
-                }).catch(e => console.error("Erro ao salvar pedido:", e));
-            });
+            for (const item of carrinho) {
+                try {
+                    await addDoc(collection(window.db, "pedidos"), {
+                        cliente: nomeCliente,
+                        produto: `${item.quantidade}x ${item.nome}`,
+                        valor: (item.preco * item.quantidade).toFixed(2),
+                        status: "novo",
+                        data: dataHora
+                    });
+                } catch (e) {
+                    console.error("Erro ao salvar pedido:", e);
+                }
+            }
         }
 
-        // Limpa o carrinho após enviar
         carrinho = [];
         atualizarContador();
-    };
+    }
 
     // =============================================
-    // 3. CARROSSEL / NAVEGAÇÃO
+    // 3. CARROSSEL
     // =============================================
-    window.scrollMenu = function(direcao) {
+    function scrollMenu(direcao) {
         const carrossel = document.getElementById('menuCarrossel');
-        if (carrossel) {
-            const larguraCard = carrossel.firstElementChild
-                ? carrossel.firstElementChild.offsetWidth + 12
-                : carrossel.offsetWidth;
+        if (carrossel && carrossel.firstElementChild) {
+            const larguraCard = carrossel.firstElementChild.offsetWidth + 12;
             carrossel.scrollBy({ left: direcao * larguraCard, behavior: 'smooth' });
         }
-    };
+    }
 
     function inicializarIndicadores() {
         const carrossel = document.getElementById('menuCarrossel');
@@ -214,7 +236,9 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         carrossel.addEventListener('scroll', () => {
-            const larguraCard = cards[0] ? cards[0].offsetWidth + 12 : carrossel.offsetWidth;
+            const cardsAtuais = carrossel.querySelectorAll('.card-categoria');
+            if (cardsAtuais.length === 0) return;
+            const larguraCard = cardsAtuais[0].offsetWidth + 12;
             const index = Math.round(carrossel.scrollLeft / larguraCard);
             container.querySelectorAll('.indicador').forEach((dot, i) => {
                 dot.classList.toggle('ativo', i === index);
@@ -222,105 +246,20 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    function inicializarSwipe() {
-        const carrossel = document.getElementById('menuCarrossel');
-        if (!carrossel) return;
-        let startX = 0;
-        carrossel.addEventListener('touchstart', e => {
-            startX = e.touches[0].clientX;
-        }, { passive: true });
-        carrossel.addEventListener('touchend', e => {
-            // scroll nativo já cuida do snap
-        }, { passive: true });
-    }
-
-    inicializarIndicadores();
-    inicializarSwipe();
-
     // =============================================
-    // 4. BOTÕES "SAIBA MAIS" — CORRIGIDO
+    // 4. MODAL DE SENHA ADMIN
     // =============================================
-    document.querySelectorAll('.btn-filtro').forEach(btn => {
-        btn.addEventListener('click', () => {
-            const targetId = btn.getAttribute('data-target');
-            const elemento = document.getElementById(targetId);
-            if (!elemento) return;
+    let adminSection = null;
+    const SENHA_CORRETA = "5060";
 
-            // Se for a seção "Nesta Semana" (promoções), apenas rola até ela sem esconder
-            if (targetId === 'secao-promocoes') {
-                elemento.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                return;
-            }
+    function criarModalSenha() {
+        // Remove se já existir
+        const existing = document.getElementById('modal-senha-admin');
+        if (existing) existing.remove();
 
-            // Para as outras seções, mantém o comportamento de toggle
-            const jaAberto = elemento.classList.contains('visivel');
-            if (jaAberto) {
-                elemento.classList.remove('visivel');
-                elemento.style.display = 'none';
-            } else {
-                elemento.classList.add('visivel');
-                elemento.style.display = 'block';
-                setTimeout(() => {
-                    elemento.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                }, 100);
-            }
-        });
-    });
-
-    // =============================================
-    // 5. FIREBASE
-    // =============================================
-    setTimeout(() => {
-        if (!window.dbMetodos) return;
-
-        const { collection, addDoc, onSnapshot, deleteDoc, doc, query, orderBy, setDoc, getDoc, updateDoc, serverTimestamp } = window.dbMetodos;
-        const db = window.db;
-        const produtosRef = collection(db, "produtos_v2");
-
-        // --- VARIÁVEIS PARA PRODUTOS DA SEMANA ---
-        let produtosIdsSemana = [];
-
-        // --- BANNER ---
-        async function carregarBanner() {
-            try {
-                const bannerDoc = await getDoc(doc(db, "configuracoes", "banner"));
-                if (bannerDoc.exists()) {
-                    const dados = bannerDoc.data();
-                    const spanAviso = document.getElementById('texto-aviso');
-                    const inputBanner = document.getElementById('textoBanner');
-                    const bannerDiv = document.getElementById('banner-aviso');
-                    if (spanAviso && dados.texto) spanAviso.textContent = dados.texto;
-                    if (inputBanner && dados.texto) inputBanner.value = dados.texto;
-                    if (bannerDiv) bannerDiv.style.display = dados.visivel === false ? 'none' : 'flex';
-                }
-            } catch (e) {}
-        }
-        carregarBanner();
-
-        window.salvarBanner = async function() {
-            const texto = document.getElementById('textoBanner').value.trim();
-            if (!texto) { alert("Digite uma mensagem para o banner!"); return; }
-            try {
-                await setDoc(doc(db, "configuracoes", "banner"), { texto, visivel: true });
-                document.getElementById('texto-aviso').textContent = texto;
-                document.getElementById('banner-aviso').style.display = 'flex';
-                alert("✅ Banner atualizado com sucesso!");
-            } catch (e) {
-                alert("Erro ao salvar banner. Verifique a conexão.");
-            }
-        };
-
-        const doceForm = document.getElementById('doceForm');
-        const adminSection = document.getElementById('admin-section');
-        let cliques = 0;
-
-        // --- MODAL DE SENHA ADMIN ---
-        const senhaCorreta = "5060"; // 🔑 Altere aqui para a sua senha de 4 dígitos
-
-        // Cria o modal de senha dinamicamente
         const modalSenha = document.createElement('div');
         modalSenha.id = 'modal-senha-admin';
-        modalSenha.style = `
+        modalSenha.style.cssText = `
             display: none;
             position: fixed;
             top: 0; left: 0;
@@ -348,7 +287,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     type="password"
                     inputmode="numeric"
                     maxlength="4"
-                    pattern="[0-9]*"
                     placeholder="• • • •"
                     style="
                         width: 100%;
@@ -379,76 +317,119 @@ document.addEventListener('DOMContentLoaded', () => {
             </div>
         `;
         document.body.appendChild(modalSenha);
+        return modalSenha;
+    }
 
-        function abrirModalSenha() {
-            const input = document.getElementById('input-senha-admin');
-            const msg = document.getElementById('msg-senha-errada');
-            input.value = '';
-            msg.textContent = '';
-            input.style.border = '2px solid #ddd';
-            modalSenha.style.display = 'flex';
-            setTimeout(() => input.focus(), 150);
+    let cliquesAdmin = 0;
+
+    function abrirModalSenha() {
+        let modal = document.getElementById('modal-senha-admin');
+        if (!modal) modal = criarModalSenha();
+        
+        const input = document.getElementById('input-senha-admin');
+        const msg = document.getElementById('msg-senha-errada');
+        if (input) input.value = '';
+        if (msg) msg.textContent = '';
+        if (input) input.style.border = '2px solid #ddd';
+        modal.style.display = 'flex';
+        setTimeout(() => input && input.focus(), 150);
+    }
+
+    function fecharModalSenha() {
+        const modal = document.getElementById('modal-senha-admin');
+        if (modal) modal.style.display = 'none';
+        cliquesAdmin = 0;
+    }
+
+    function verificarSenha() {
+        const input = document.getElementById('input-senha-admin');
+        const msg = document.getElementById('msg-senha-errada');
+        if (input && input.value === SENHA_CORRETA) {
+            fecharModalSenha();
+            if (adminSection) adminSection.style.display = 'block';
+        } else {
+            if (input) input.style.border = '2px solid #e91e63';
+            if (msg) msg.textContent = '❌ Senha incorreta. Tente novamente.';
+            if (input) input.value = '';
+            setTimeout(() => input && input.focus(), 100);
         }
+    }
 
-        function fecharModalSenha() {
-            modalSenha.style.display = 'none';
-            cliques = 0;
-        }
-
-        function verificarSenha() {
-            const input = document.getElementById('input-senha-admin');
-            const msg = document.getElementById('msg-senha-errada');
-            if (input.value === senhaCorreta) {
-                fecharModalSenha();
-                adminSection.style.display = 'block';
-                carregarListaProdutosAdmin();
-                inicializarVitrine();
+    // =============================================
+    // 5. FIREBASE E VITRINE
+    // =============================================
+    function aguardarFirebase() {
+        return new Promise((resolve) => {
+            if (window.db && window.dbMetodos) {
+                resolve();
             } else {
-                input.style.border = '2px solid #e91e63';
-                msg.textContent = '❌ Senha incorreta. Tente novamente.';
-                input.value = '';
-                setTimeout(() => input.focus(), 100);
+                window.addEventListener('firebase-ready', resolve, { once: true });
+            }
+        });
+    }
+
+    async function inicializarFirebase() {
+        await aguardarFirebase();
+        
+        if (!window.dbMetodos) {
+            console.error("Firebase não disponível");
+            return;
+        }
+
+        const { collection, addDoc, onSnapshot, deleteDoc, doc, query, orderBy, setDoc, getDoc, updateDoc, serverTimestamp } = window.dbMetodos;
+        const db = window.db;
+        const produtosRef = collection(db, "produtos_v2");
+
+        let produtosIdsSemana = [];
+
+        // ========== BANNER ==========
+        async function carregarBanner() {
+            try {
+                const bannerDoc = await getDoc(doc(db, "configuracoes", "banner"));
+                if (bannerDoc.exists()) {
+                    const dados = bannerDoc.data();
+                    const spanAviso = document.getElementById('texto-aviso');
+                    const inputBanner = document.getElementById('textoBanner');
+                    const bannerDiv = document.getElementById('banner-aviso');
+                    if (spanAviso && dados.texto) spanAviso.textContent = dados.texto;
+                    if (inputBanner && dados.texto) inputBanner.value = dados.texto;
+                    if (bannerDiv) bannerDiv.style.display = dados.visivel === false ? 'none' : 'flex';
+                }
+            } catch (e) {
+                console.error("Erro ao carregar banner:", e);
             }
         }
 
-        document.getElementById('btn-confirmar-senha').addEventListener('click', verificarSenha);
-        document.getElementById('btn-cancelar-senha').addEventListener('click', fecharModalSenha);
-        document.getElementById('input-senha-admin').addEventListener('keydown', (e) => {
-            if (e.key === 'Enter') verificarSenha();
-        });
-        // Fecha ao clicar fora da caixa
-        modalSenha.addEventListener('click', (e) => {
-            if (e.target === modalSenha) fecharModalSenha();
-        });
-
-        // --- MODO ADMIN (3 cliques no título) ---
-        document.getElementById('titulo-principal').addEventListener('click', () => {
-            cliques++;
-            if (cliques === 3) {
-                abrirModalSenha();
+        window.salvarBanner = async function() {
+            const texto = document.getElementById('textoBanner')?.value.trim();
+            if (!texto) {
+                alert("Digite uma mensagem para o banner!");
+                return;
             }
-        });
-
-        // --- EXCLUIR PRODUTO ---
-        window.excluirProduto = async (id) => {
-            if (confirm("Deseja remover este produto da nuvem?")) {
-                await deleteDoc(doc(db, "produtos_v2", id));
+            try {
+                await setDoc(doc(db, "configuracoes", "banner"), { texto, visivel: true });
+                const spanAviso = document.getElementById('texto-aviso');
+                if (spanAviso) spanAviso.textContent = texto;
+                const bannerDiv = document.getElementById('banner-aviso');
+                if (bannerDiv) bannerDiv.style.display = 'flex';
+                alert("✅ Banner atualizado com sucesso!");
+            } catch (e) {
+                alert("Erro ao salvar banner.");
             }
         };
 
-        // --- CARREGAR PRODUTOS SALVOS DA SEMANA ---
+        // ========== PRODUTOS DA SEMANA ==========
         async function carregarProdutosSemana() {
             try {
                 const semanaDoc = await getDoc(doc(db, "configuracoes", "produtos_semana"));
                 if (semanaDoc.exists()) {
                     produtosIdsSemana = semanaDoc.data().produtosIds || [];
-                } else {
-                    produtosIdsSemana = [];
                 }
-            } catch (e) { console.error("Erro ao carregar produtos da semana:", e); }
+            } catch (e) {
+                console.error("Erro ao carregar produtos da semana:", e);
+            }
         }
 
-        // --- SALVAR PRODUTOS SELECIONADOS ---
         window.salvarProdutosSemana = async function() {
             const idsSelecionados = [];
             document.querySelectorAll('.checkbox-produto-semana:checked').forEach(cb => {
@@ -472,10 +453,12 @@ document.addEventListener('DOMContentLoaded', () => {
                     setTimeout(() => { if (statusSpan) statusSpan.innerHTML = ''; }, 2000);
                 }
                 inicializarVitrine();
-            } catch (e) { alert("Erro ao salvar seleção."); }
+            } catch (e) {
+                alert("Erro ao salvar seleção.");
+            }
         };
 
-        // --- CARREGAR LISTA DE PRODUTOS NO ADMIN ---
+        // ========== LISTA DE PRODUTOS PARA ADMIN ==========
         function carregarListaProdutosAdmin() {
             const container = document.getElementById('lista-produtos-para-semana');
             if (!container) return;
@@ -517,7 +500,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             <input type="checkbox" class="checkbox-produto-semana" value="${p.id}" ${produtosIdsSemana.includes(p.id) ? 'checked' : ''}>
                             <img src="${p.urlImagem}" onerror="this.src='https://via.placeholder.com/40'">
                             <div class="info">
-                                <div class="nome">${p.nome}</div>
+                                <div class="nome">${escapeHtml(p.nome)}</div>
                                 <div class="preco">R$ ${precoFormatado}</div>
                             </div>
                         `;
@@ -528,7 +511,13 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
 
-        // --- VITRINE ---
+        // ========== VITRINE PRINCIPAL ==========
+        window.excluirProduto = async (id) => {
+            if (confirm("Deseja remover este produto da nuvem?")) {
+                await deleteDoc(doc(db, "produtos_v2", id));
+            }
+        };
+
         function inicializarVitrine() {
             const listas = {
                 'PROMOCAO': 'listaPromocoes',
@@ -542,7 +531,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const q = query(produtosRef, orderBy("dataCriacao", "desc"));
 
             onSnapshot(q, (snapshot) => {
-                // Limpar todas as listas
                 Object.values(listas).forEach(id => {
                     const div = document.getElementById(id);
                     if (div) div.innerHTML = '';
@@ -560,9 +548,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     produtosPorId[id] = { id, ...p };
                 });
 
-                const estaNoModoAdmin = adminSection.style.display === 'block';
+                const estaNoModoAdmin = adminSection && adminSection.style.display === 'block';
 
-                // Renderizar categorias fixas
                 for (const [categoria, listaId] of Object.entries(listas)) {
                     const produtos = produtosPorCategoria[categoria] || [];
                     const container = document.getElementById(listaId);
@@ -570,9 +557,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     
                     produtos.forEach(p => {
                         const precoFormatado = parseFloat(p.preco).toFixed(2).replace('.', ',');
-                        const nomeSeguro = p.nome.replace(/'/g, "\\'");
+                        const nomeSeguro = escapeHtml(p.nome);
                         const btnExcluir = estaNoModoAdmin
-                            ? `<button class="btn-remover" onclick="excluirProduto('${p.id}')" style="position:absolute;top:5px;right:5px;background:red;color:white;border:none;border-radius:50%;width:25px;height:25px;cursor:pointer;z-index:10;">×</button>`
+                            ? `<button class="btn-remover" onclick="window.excluirProduto('${p.id}')" style="position:absolute;top:5px;right:5px;background:red;color:white;border:none;border-radius:50%;width:25px;height:25px;cursor:pointer;z-index:10;font-weight:bold;">×</button>`
                             : '';
                         const badgePromocao = p.categoria === 'PROMOCAO'
                             ? `<div style="background:#e91e63;color:white;font-size:0.75rem;font-weight:bold;padding:4px 10px;text-align:center;">🔥 PROMOÇÃO</div>`
@@ -586,12 +573,12 @@ document.addEventListener('DOMContentLoaded', () => {
                             ${badgePromocao}
                             <img src="${p.urlImagem}" alt="${p.nome}" onerror="this.src='https://via.placeholder.com/300x200?text=Imagem+nao+encontrada'">
                             <div style="padding:15px">
-                                <h3 style="margin:0; font-size:1.1rem">${p.nome}</h3>
+                                <h3 style="margin:0; font-size:1.1rem">${escapeHtml(p.nome)}</h3>
                                 <p style="color:#8c6239; font-weight:bold; margin:10px 0">R$ ${precoFormatado}</p>
                                 <button
                                     class="btn-whats btn-adicionar-carrinho"
                                     data-nome="${p.nome}"
-                                    onclick="adicionarAoCarrinho('${nomeSeguro}', '${p.preco}')">
+                                    onclick="adicionarAoCarrinho('${nomeSeguro.replace(/'/g, "\\'")}', '${p.preco}')">
                                     🛒 Adicionar
                                 </button>
                             </div>
@@ -600,7 +587,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     });
                 }
 
-                // ========== RENDERIZAR "NESTA SEMANA" COM PRODUTOS SELECIONADOS ==========
+                // Seção "Nesta Semana"
                 const secaoSemana = document.getElementById('secao-promocoes');
                 const containerSemana = document.getElementById('listaPromocoes');
                 
@@ -616,9 +603,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     } else {
                         produtosSemana.forEach(p => {
                             const precoFormatado = parseFloat(p.preco).toFixed(2).replace('.', ',');
-                            const nomeSeguro = p.nome.replace(/'/g, "\\'");
-                            const btnExcluir = estaNoModoAdmin
-                                ? `<button class="btn-remover" onclick="excluirProduto('${p.id}')" style="position:absolute;top:5px;right:5px;background:red;color:white;border:none;border-radius:50%;width:25px;height:25px;cursor:pointer;z-index:10;">×</button>`
+                            const nomeSeguro = escapeHtml(p.nome);
+                            const btnExcluir = (adminSection && adminSection.style.display === 'block')
+                                ? `<button class="btn-remover" onclick="window.excluirProduto('${p.id}')" style="position:absolute;top:5px;right:5px;background:red;color:white;border:none;border-radius:50%;width:25px;height:25px;cursor:pointer;z-index:10;font-weight:bold;">×</button>`
                                 : '';
                             
                             const card = document.createElement('div');
@@ -628,12 +615,12 @@ document.addEventListener('DOMContentLoaded', () => {
                                 ${btnExcluir}
                                 <img src="${p.urlImagem}" alt="${p.nome}" onerror="this.src='https://via.placeholder.com/300x200?text=Sem+imagem'">
                                 <div style="padding:15px">
-                                    <h3 style="margin:0; font-size:1.1rem">${p.nome}</h3>
+                                    <h3 style="margin:0; font-size:1.1rem">${escapeHtml(p.nome)}</h3>
                                     <p style="color:#8c6239; font-weight:bold; margin:10px 0">R$ ${precoFormatado}</p>
                                     <button
                                         class="btn-whats btn-adicionar-carrinho"
                                         data-nome="${p.nome}"
-                                        onclick="adicionarAoCarrinho('${nomeSeguro}', '${p.preco}')">
+                                        onclick="adicionarAoCarrinho('${nomeSeguro.replace(/'/g, "\\'")}', '${p.preco}')">
                                         🛒 Adicionar
                                     </button>
                                 </div>
@@ -647,42 +634,49 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
 
-        // --- FORMULÁRIO DE CADASTRO ---
-        doceForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const btnSubmit = doceForm.querySelector('button');
-            btnSubmit.disabled = true;
-            btnSubmit.innerText = "Salvando...";
-            try {
-                await addDoc(produtosRef, {
-                    nome: document.getElementById('nome').value,
-                    preco: document.getElementById('preco').value,
-                    urlImagem: document.getElementById('urlImagem').value,
-                    categoria: document.getElementById('categoria').value,
-                    dataCriacao: new Date()
-                });
-                doceForm.reset();
-                alert("Produto salvo com sucesso!");
-            } catch (err) {
-                alert("Erro ao salvar. Verifique a conexão.");
-            } finally {
-                btnSubmit.disabled = false;
-                btnSubmit.innerText = "Salvar na Nuvem";
-            }
-        });
+        // ========== FORMULÁRIO DE CADASTRO ==========
+        const doceForm = document.getElementById('doceForm');
+        if (doceForm) {
+            doceForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const btnSubmit = doceForm.querySelector('button[type="submit"]');
+                const textoOriginal = btnSubmit?.textContent || "Salvar na Nuvem";
+                if (btnSubmit) {
+                    btnSubmit.disabled = true;
+                    btnSubmit.innerText = "Salvando...";
+                }
+                try {
+                    await addDoc(produtosRef, {
+                        nome: document.getElementById('nome').value,
+                        preco: document.getElementById('preco').value,
+                        urlImagem: document.getElementById('urlImagem').value,
+                        categoria: document.getElementById('categoria').value,
+                        dataCriacao: new Date()
+                    });
+                    doceForm.reset();
+                    alert("Produto salvo com sucesso!");
+                } catch (err) {
+                    alert("Erro ao salvar. Verifique a conexão.");
+                } finally {
+                    if (btnSubmit) {
+                        btnSubmit.disabled = false;
+                        btnSubmit.innerText = textoOriginal;
+                    }
+                }
+            });
+        }
 
-        // --- GERENCIAR STATUS DE PEDIDO ---
+        // ========== PEDIDOS ==========
         window.marcarComoEntregue = async (id) => {
-            await updateDoc(doc(window.db, "pedidos", id), { status: "concluído" });
+            await updateDoc(doc(db, "pedidos", id), { status: "concluído" });
         };
 
         window.excluirPedido = async (id) => {
             if (confirm("Excluir este registro de pedido?")) {
-                await deleteDoc(doc(window.db, "pedidos", id));
+                await deleteDoc(doc(db, "pedidos", id));
             }
         };
 
-        // --- PAINEL DE PEDIDOS COM SOMA POR CLIENTE E TOTAL GERAL ---
         function monitorarPedidos() {
             const q = query(collection(db, "pedidos"), orderBy("data", "desc"));
 
@@ -696,7 +690,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     return;
                 }
 
-                // Agrupa pedidos por cliente
                 const pedidosPorCliente = {};
                 let totalGeral = 0;
                 let totalPedidos = 0;
@@ -714,9 +707,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     pedidosPorCliente[cliente].pedidos.push({ ...pedido, id: docSnap.id });
                 });
 
-                // --- RESUMO GERAL NO TOPO ---
                 const resumo = document.createElement('div');
-                resumo.style = `
+                resumo.style.cssText = `
                     background: linear-gradient(135deg, #e91e63, #c2185b);
                     color: white;
                     border-radius: 12px;
@@ -738,12 +730,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 `;
                 container.appendChild(resumo);
 
-                // --- BLOCO POR CLIENTE ---
                 Object.entries(pedidosPorCliente).forEach(([nomeCliente, dados]) => {
-
-                    // Cabeçalho do cliente com subtotal
                     const headerCliente = document.createElement('div');
-                    headerCliente.style = `
+                    headerCliente.style.cssText = `
                         background: linear-gradient(135deg, #fce4ec, #fff0f5);
                         border: 1.5px solid #e91e63;
                         border-radius: 10px;
@@ -756,14 +745,13 @@ document.addEventListener('DOMContentLoaded', () => {
                         gap: 6px;
                     `;
                     headerCliente.innerHTML = `
-                        <span style="font-weight:bold; color:#c2185b; font-size:1rem;">👤 ${nomeCliente}</span>
+                        <span style="font-weight:bold; color:#c2185b; font-size:1rem;">👤 ${escapeHtml(nomeCliente)}</span>
                         <span style="background:#c2185b; color:white; padding:4px 14px; border-radius:20px; font-size:0.9rem; font-weight:bold;">
                             Subtotal: R$ ${dados.total.toFixed(2).replace('.', ',')}
                         </span>
                     `;
                     container.appendChild(headerCliente);
 
-                    // Pedidos individuais do cliente
                     dados.pedidos.forEach((pedido) => {
                         const id = pedido.id;
                         const dataFormata = pedido.data
@@ -775,7 +763,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         const isNovo = pedido.status === 'novo';
 
                         const cardPedido = document.createElement('div');
-                        cardPedido.style = `
+                        cardPedido.style.cssText = `
                             padding: 10px 14px;
                             border-left: 5px solid ${isNovo ? '#e91e63' : '#25d366'};
                             background: #f9f9f9;
@@ -787,7 +775,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         cardPedido.innerHTML = `
                             <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
                                 <div>
-                                    <span style="color:#8c6239; font-weight:bold;">${pedido.produto}</span>
+                                    <span style="color:#8c6239; font-weight:bold;">${escapeHtml(pedido.produto)}</span>
                                     <span style="margin-left:8px; background:#fff3e0; color:#8c6239; border:1px solid #ffcc80; padding:2px 10px; border-radius:20px; font-size:0.85rem; font-weight:bold;">
                                         ${valorFormatado}
                                     </span><br>
@@ -798,9 +786,9 @@ document.addEventListener('DOMContentLoaded', () => {
                                 </div>
                                 <div style="display:flex; align-items:center; gap:8px;">
                                     ${isNovo
-                                        ? `<button onclick="marcarComoEntregue('${id}')" style="background:#25d366; color:white; border:none; padding:5px 12px; border-radius:5px; cursor:pointer; font-size:0.85rem;">✅ Concluir</button>`
+                                        ? `<button onclick="window.marcarComoEntregue('${id}')" style="background:#25d366; color:white; border:none; padding:5px 12px; border-radius:5px; cursor:pointer; font-size:0.85rem;">✅ Concluir</button>`
                                         : ''}
-                                    <button onclick="excluirPedido('${id}')" style="background:none; border:none; color:red; cursor:pointer; font-size:1.1rem;">🗑️</button>
+                                    <button onclick="window.excluirPedido('${id}')" style="background:none; border:none; color:red; cursor:pointer; font-size:1.1rem;">🗑️</button>
                                 </div>
                             </div>
                         `;
@@ -810,14 +798,134 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
 
-        // --- INICIALIZAR TUDO ---
-        carregarProdutosSemana().then(() => {
-            inicializarVitrine();
-            // Botão salvar produtos
-            const btnSalvar = document.getElementById('btnSalvarProdutosSemana');
-            if (btnSalvar) btnSalvar.addEventListener('click', window.salvarProdutosSemana);
-        });
+        // ========== INICIALIZAÇÃO ==========
+        await carregarProdutosSemana();
+        carregarBanner();
+        inicializarVitrine();
+        carregarListaProdutosAdmin();
         monitorarPedidos();
+
+        // Botão de salvar produtos
+        const btnSalvar = document.getElementById('btnSalvarProdutosSemana');
+        if (btnSalvar) btnSalvar.addEventListener('click', window.salvarProdutosSemana);
+
+        // Botões do banner
+        const salvarBannerBtn = document.getElementById('salvarBannerBtn');
+        if (salvarBannerBtn) salvarBannerBtn.addEventListener('click', window.salvarBanner);
         
-    }, 1200);
+        const ocultarBannerBtn = document.getElementById('ocultarBannerBtn');
+        if (ocultarBannerBtn) {
+            ocultarBannerBtn.addEventListener('click', () => {
+                const banner = document.getElementById('banner-aviso');
+                if (banner) banner.style.display = 'none';
+            });
+        }
+        
+        const mostrarBannerBtn = document.getElementById('mostrarBannerBtn');
+        if (mostrarBannerBtn) {
+            mostrarBannerBtn.addEventListener('click', () => {
+                const banner = document.getElementById('banner-aviso');
+                if (banner) banner.style.display = 'flex';
+            });
+        }
+    }
+
+    // =============================================
+    // 6. EVENT LISTENERS
+    // =============================================
+    
+    // Botões do carrossel
+    const setaEsq = document.getElementById('seta-esq');
+    const setaDir = document.getElementById('seta-dir');
+    if (setaEsq) setaEsq.addEventListener('click', () => scrollMenu(-1));
+    if (setaDir) setaDir.addEventListener('click', () => scrollMenu(1));
+
+    // Botões "Saiba Mais"
+    document.querySelectorAll('.btn-filtro').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const targetId = btn.getAttribute('data-target');
+            const elemento = document.getElementById(targetId);
+            if (!elemento) return;
+
+            if (targetId === 'secao-promocoes') {
+                elemento.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                return;
+            }
+
+            if (elemento.classList.contains('visivel')) {
+                elemento.classList.remove('visivel');
+                elemento.style.display = 'none';
+            } else {
+                elemento.classList.add('visivel');
+                elemento.style.display = 'block';
+                setTimeout(() => {
+                    elemento.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }, 100);
+            }
+        });
+    });
+
+    // Botões do carrinho
+    const btnCarrinho = document.getElementById('btn-carrinho-flutuante');
+    if (btnCarrinho) btnCarrinho.addEventListener('click', abrirCarrinho);
+    
+    const btnFecharCarrinho = document.getElementById('fechar-carrinho');
+    if (btnFecharCarrinho) btnFecharCarrinho.addEventListener('click', fecharCarrinho);
+    
+    const modalCarrinho = document.getElementById('modal-carrinho');
+    if (modalCarrinho) {
+        modalCarrinho.addEventListener('click', (e) => {
+            if (e.target === modalCarrinho) fecharCarrinho();
+        });
+    }
+
+    // Botões do modal de pedido
+    const modalBtnCancelar = document.getElementById('modal-btn-cancelar');
+    if (modalBtnCancelar) modalBtnCancelar.addEventListener('click', fecharModalPedido);
+    
+    const modalBtnConfirmar = document.getElementById('modal-btn-confirmar');
+    if (modalBtnConfirmar) modalBtnConfirmar.addEventListener('click', confirmarPedido);
+    
+    const btnFinalizar = document.getElementById('btn-finalizar-pedido');
+    if (btnFinalizar) btnFinalizar.addEventListener('click', abrirModalNome);
+
+    // Botão fechar banner
+    const fecharAviso = document.getElementById('fechar-aviso');
+    if (fecharAviso) {
+        fecharAviso.addEventListener('click', () => {
+            const banner = document.getElementById('banner-aviso');
+            if (banner) banner.style.display = 'none';
+        });
+    }
+
+    // Cliques no título para admin
+    const titulo = document.getElementById('titulo-principal');
+    adminSection = document.getElementById('admin-section');
+    
+    if (titulo) {
+        titulo.addEventListener('click', () => {
+            cliquesAdmin++;
+            if (cliquesAdmin === 3) {
+                abrirModalSenha();
+                cliquesAdmin = 0;
+            }
+        });
+    }
+
+    // Configurar modal de senha
+    document.addEventListener('click', (e) => {
+        if (e.target.id === 'btn-confirmar-senha') verificarSenha();
+        if (e.target.id === 'btn-cancelar-senha') fecharModalSenha();
+    });
+    
+    const inputSenha = document.getElementById('input-senha-admin');
+    if (inputSenha) {
+        inputSenha.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') verificarSenha();
+        });
+    }
+
+    // Inicializar Firebase e tudo
+    inicializarFirebase();
+    inicializarIndicadores();
 });
