@@ -160,14 +160,49 @@ body {
 
 header {
     text-align: center;
-    padding: 30px 10px;
+    padding: 40px 10px 30px;
 }
 
 header h1 {
     color: var(--rosa-escuro);
-    font-size: 2rem;
-    margin-bottom: 5px;
+    font-size: 3.5rem;
+    margin: 0;
     cursor: pointer;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    text-shadow: 
+        3px 3px 0px #c2185b,
+        6px 6px 0px #a01548,
+        9px 9px 0px #7e1039,
+        12px 12px 20px rgba(0, 0, 0, 0.3);
+    transition: transform 0.3s ease;
+}
+
+header h1:hover {
+    transform: scale(1.02);
+}
+
+@media (max-width: 768px) {
+    header h1 {
+        font-size: 2.5rem;
+        text-shadow: 
+            2px 2px 0px #c2185b,
+            4px 4px 0px #a01548,
+            6px 6px 0px #7e1039,
+            8px 8px 15px rgba(0, 0, 0, 0.3);
+    }
+}
+
+@media (max-width: 480px) {
+    header h1 {
+        font-size: 2rem;
+        letter-spacing: 1px;
+        text-shadow: 
+            2px 2px 0px #c2185b,
+            4px 4px 0px #a01548,
+            6px 6px 12px rgba(0, 0, 0, 0.3);
+    }
 }
 
 /* --- CARROSSEL DE CATEGORIAS --- */
@@ -219,7 +254,17 @@ header h1 {
     padding-bottom: 25px;
     border-radius: 16px;
     box-shadow: 0 6px 20px rgba(0,0,0,0.25);
-    transition: transform 0.2s;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    cursor: pointer;
+}
+
+.card-categoria:hover {
+    transform: scale(1.05);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.35);
+}
+
+.card-categoria:active {
+    transform: scale(1.02);
 }
 
 .info-card {

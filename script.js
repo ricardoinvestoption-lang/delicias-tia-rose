@@ -925,6 +925,278 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // =============================================
+    // 7. GERAR RELATÓRIO DE PEDIDOS
+    // =============================================
+    window.gerarRelatorio = async function() {
+        if (!window.db || !window.dbMetodos) {
+            alert('Firebase não está disponível');
+            return;
+        }
+
+        const { collection, query, orderBy, getDocs } = window.dbMetodos;
+        
+        try {
+            const q = query(collection(window.db, "pedidos"), orderBy("data", "desc"));
+            const snapshot = await getDocs(q);
+            
+            if (snapshot.empty) {
+                alert('Não há pedidos para gerar relatório.');
+                return;
+            }
+
+            // Organizar pedidos por cliente
+            const pedidosPorCliente = {};
+            let totalGeral = 0;
+
+            snapshot.forEach((docSnap) => {
+                const pedido = docSnap.data();
+                const cliente = pedido.cliente || 'Desconhecido';
+                const valor = parseFloat(pedido.valor) || 0;
+                
+                if (!pedidosPorCliente[cliente]) {
+                    pedidosPorCliente[cliente] = {
+                        pedidos: [],
+                        total: 0
+                    };
+                }
+                
+                pedidosPorCliente[cliente].pedidos.push({
+                    produto: pedido.produto,
+                    valor: valor,
+                    data: pedido.data ? pedido.data.toDate() : new Date(),
+                    status: pedido.status
+                });
+                
+                pedidosPorCliente[cliente].total += valor;
+                totalGeral += valor;
+            });
+
+            // Gerar HTML do relatório
+            let htmlRelatorio = `
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Relatório de Pedidos - Delícias da Tia Rose</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding: 20px;
+            background: #fce4ec;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 3px solid #e91e63;
+        }
+        .header h1 {
+            color: #e91e63;
+            font-size: 2rem;
+            margin-bottom: 5px;
+        }
+        .header p {
+            color: #666;
+            font-size: 0.95rem;
+        }
+        .resumo-geral {
+            background: linear-gradient(135deg, #e91e63, #c2185b);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        .resumo-geral .info {
+            font-size: 1.1rem;
+        }
+        .resumo-geral .total {
+            font-size: 1.5rem;
+            font-weight: bold;
+            background: rgba(255,255,255,0.2);
+            padding: 8px 20px;
+            border-radius: 25px;
+        }
+        .cliente-section {
+            margin-bottom: 15px;
+            border: 2px solid #e91e63;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        .cliente-header {
+            background: linear-gradient(135deg, #fff0f5, #ffe4ec);
+            padding: 12px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .cliente-nome {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #c2185b;
+        }
+        .cliente-total {
+            background: #c2185b;
+            color: white;
+            padding: 6px 18px;
+            border-radius: 20px;
+            font-weight: bold;
+        }
+        .pedidos-lista {
+            padding: 15px 20px;
+        }
+        .pedido-item {
+            padding: 12px 0;
+            border-bottom: 1px solid #f0f0f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+        }
+        .pedido-item:last-child {
+            border-bottom: none;
+        }
+        .pedido-produto {
+            flex: 1;
+            color: #333;
+            font-weight: 500;
+        }
+        .pedido-valor {
+            color: #8c6239;
+            font-weight: bold;
+            background: #fff3e0;
+            padding: 4px 12px;
+            border-radius: 15px;
+            border: 1px solid #ffcc80;
+        }
+        .rodape {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 2px solid #e91e63;
+            text-align: center;
+            color: #666;
+            font-size: 0.9rem;
+        }
+        @media print {
+            body { background: white; padding: 0; }
+            .container { box-shadow: none; }
+            .btn-imprimir { display: none; }
+        }
+        .btn-imprimir {
+            background: linear-gradient(135deg, #25d366, #1da851);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            margin: 20px auto;
+            display: block;
+            box-shadow: 0 4px 12px rgba(37,211,102,0.3);
+        }
+        .btn-imprimir:hover {
+            transform: scale(1.02);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🌸 Delícias da Tia Rose</h1>
+            <p>Relatório de Pedidos - ${new Date().toLocaleDateString('pt-BR', { 
+                day: '2-digit', 
+                month: 'long', 
+                year: 'numeric' 
+            })}</p>
+        </div>
+
+        <div class="resumo-geral">
+            <div class="info">
+                📊 ${snapshot.size} pedido(s) · ${Object.keys(pedidosPorCliente).length} cliente(s)
+            </div>
+            <div class="total">
+                💰 Total Geral: R$ ${totalGeral.toFixed(2).replace('.', ',')}
+            </div>
+        </div>
+`;
+
+            // Adicionar cada cliente e seus pedidos
+            for (const [nomeCliente, dados] of Object.entries(pedidosPorCliente)) {
+                htmlRelatorio += `
+        <div class="cliente-section">
+            <div class="cliente-header">
+                <div class="cliente-nome">👤 ${escapeHtml(nomeCliente)}</div>
+                <div class="cliente-total">R$ ${dados.total.toFixed(2).replace('.', ',')}</div>
+            </div>
+            <div class="pedidos-lista">
+`;
+                
+                dados.pedidos.forEach(pedido => {
+                    htmlRelatorio += `
+                <div class="pedido-item">
+                    <div class="pedido-produto">${escapeHtml(pedido.produto)}</div>
+                    <div class="pedido-valor">R$ ${pedido.valor.toFixed(2).replace('.', ',')}</div>
+                </div>
+`;
+                });
+                
+                htmlRelatorio += `
+            </div>
+        </div>
+`;
+            }
+
+            htmlRelatorio += `
+        <button class="btn-imprimir" onclick="window.print()">🖨️ Imprimir Relatório</button>
+
+        <div class="rodape">
+            <p>Relatório gerado automaticamente pelo sistema</p>
+            <p style="margin-top:5px; font-size:0.85rem;">Delícias da Tia Rose - Doces feitos com amor ❤️</p>
+        </div>
+    </div>
+</body>
+</html>
+`;
+
+            // Abrir relatório em nova janela
+            const janelaRelatorio = window.open('', '_blank');
+            if (janelaRelatorio) {
+                janelaRelatorio.document.write(htmlRelatorio);
+                janelaRelatorio.document.close();
+            } else {
+                alert('Por favor, permita pop-ups para visualizar o relatório.');
+            }
+
+        } catch (error) {
+            console.error('Erro ao gerar relatório:', error);
+            alert('Erro ao gerar relatório. Tente novamente.');
+        }
+    };
+
+    // Event listener para o botão de gerar relatório
+    const btnGerarRelatorio = document.getElementById('btnGerarRelatorio');
+    if (btnGerarRelatorio) {
+        btnGerarRelatorio.addEventListener('click', window.gerarRelatorio);
+    }
+
     // Inicializar Firebase e tudo
     inicializarFirebase();
     inicializarIndicadores();
