@@ -5,7 +5,7 @@
 // todos os navegadores a baixar os arquivos novos
 // =============================================
 
-const CACHE_VERSION = 'tia-rose-v4';
+const CACHE_VERSION = 'tia-rose-v5';
 
 const ARQUIVOS_CACHE = [
   '/',
