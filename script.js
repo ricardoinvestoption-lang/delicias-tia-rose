@@ -463,9 +463,14 @@ document.addEventListener('DOMContentLoaded', () => {
             const container = document.getElementById('lista-produtos-para-semana');
             if (!container) return;
             
-            const q = query(produtosRef, orderBy("categoria"), orderBy("dataCriacao", "desc"));
+            const q = query(produtosRef, orderBy("dataCriacao", "desc"));
             
             onSnapshot(q, (snapshot) => {
+                if (snapshot.error) {
+                    console.error("Erro ao carregar produtos:", snapshot.error);
+                    container.innerHTML = '<p style="color:red; text-align:center;">Erro ao carregar produtos. Tente recarregar a página.</p>';
+                    return;
+                }
                 container.innerHTML = '';
                 if (snapshot.empty) {
                     container.innerHTML = '<p style="color:#aaa; text-align:center;">Nenhum produto cadastrado ainda.</p>';
