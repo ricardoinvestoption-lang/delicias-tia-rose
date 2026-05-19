@@ -516,6 +516,86 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
 
+        // ========== LISTA DE PRODUTOS PARA GERENCIAR (EDITAR/EXCLUIR) ==========
+        function carregarListaProdutosGerenciar() {
+            const container = document.getElementById('lista-produtos-gerenciar');
+            if (!container) return;
+            
+            const q = query(produtosRef, orderBy("dataCriacao", "desc"));
+            
+            onSnapshot(q, (snapshot) => {
+                if (snapshot.error) {
+                    console.error("Erro ao carregar produtos:", snapshot.error);
+                    container.innerHTML = '<p style="color:red; text-align:center;">Erro ao carregar produtos. Tente recarregar a página.</p>';
+                    return;
+                }
+                container.innerHTML = '';
+                if (snapshot.empty) {
+                    container.innerHTML = '<p style="color:#aaa; text-align:center;">Nenhum produto cadastrado ainda. Use o formulário acima para adicionar.</p>';
+                    return;
+                }
+                
+                const porCategoria = {};
+                snapshot.forEach(docSnap => {
+                    const p = docSnap.data();
+                    const cat = p.categoria || 'OUTROS';
+                    if (!porCategoria[cat]) porCategoria[cat] = [];
+                    porCategoria[cat].push({ id: docSnap.id, ...p });
+                });
+                
+                for (const [categoria, produtos] of Object.entries(porCategoria)) {
+                    const catDiv = document.createElement('div');
+                    catDiv.style.marginBottom = '15px';
+                    catDiv.style.borderBottom = '1px solid #eee';
+                    catDiv.style.paddingBottom = '10px';
+                    
+                    const tituloCat = document.createElement('h4');
+                    tituloCat.style.margin = '0 0 8px 0';
+                    tituloCat.style.color = '#6d4c41';
+                    tituloCat.textContent = `📁 ${categoria}`;
+                    catDiv.appendChild(tituloCat);
+                    
+                    produtos.forEach(p => {
+                        const precoFormatado = parseFloat(p.preco).toFixed(2).replace('.', ',');
+                        const itemDiv = document.createElement('div');
+                        itemDiv.style.cssText = `
+                            display: flex;
+                            align-items: center;
+                            gap: 10px;
+                            padding: 8px;
+                            background: #fafafa;
+                            border-radius: 8px;
+                            margin-bottom: 8px;
+                            border: 1px solid #e0e0e0;
+                        `;
+                        itemDiv.innerHTML = `
+                            <img src="${p.urlImagem}" 
+                                 onerror="this.src='https://via.placeholder.com/50'" 
+                                 style="width:50px; height:50px; object-fit:cover; border-radius:6px; border:1px solid #ddd;">
+                            <div style="flex:1; min-width:0;">
+                                <div style="font-weight:bold; color:#333; font-size:0.95rem; margin-bottom:2px;">${escapeHtml(p.nome)}</div>
+                                <div style="color:#6d4c41; font-size:0.85rem; font-weight:bold;">R$ ${precoFormatado}</div>
+                            </div>
+                            <div style="display:flex; gap:6px;">
+                                <button onclick="window.editarProduto('${p.id}')" 
+                                        style="background:#2196F3; color:white; border:none; border-radius:6px; padding:6px 12px; cursor:pointer; font-size:0.85rem; font-weight:bold; display:flex; align-items:center; gap:4px;"
+                                        title="Editar produto">
+                                    ✏️ Editar
+                                </button>
+                                <button onclick="window.excluirProduto('${p.id}')" 
+                                        style="background:#f44336; color:white; border:none; border-radius:6px; padding:6px 12px; cursor:pointer; font-size:0.85rem; font-weight:bold; display:flex; align-items:center; gap:4px;"
+                                        title="Excluir produto">
+                                    🗑️ Excluir
+                                </button>
+                            </div>
+                        `;
+                        catDiv.appendChild(itemDiv);
+                    });
+                    container.appendChild(catDiv);
+                }
+            });
+        }
+
         // ========== VITRINE PRINCIPAL ==========
         window.excluirProduto = async (id) => {
             if (confirm("Deseja remover este produto da nuvem?")) {
@@ -523,10 +603,51 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         };
 
+        window.editarProduto = async (id) => {
+            try {
+                const produtoDoc = await getDoc(doc(db, "produtos_v2", id));
+                if (produtoDoc.exists()) {
+                    const produto = produtoDoc.data();
+                    
+                    // Preencher o formulário
+                    document.getElementById('produtoId').value = id;
+                    document.getElementById('nome').value = produto.nome;
+                    document.getElementById('preco').value = produto.preco;
+                    document.getElementById('urlImagem').value = produto.urlImagem;
+                    document.getElementById('categoria').value = produto.categoria;
+                    
+                    // Alterar o título e mostrar botão cancelar
+                    const titulo = document.getElementById('titulo-form-produto');
+                    if (titulo) titulo.textContent = '✏️ Editar Produto';
+                    
+                    const btnCancelar = document.getElementById('btnCancelarEdicao');
+                    if (btnCancelar) btnCancelar.style.display = 'block';
+                    
+                    // Scroll para o formulário
+                    document.getElementById('doceForm').scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            } catch (e) {
+                alert("Erro ao carregar produto para edição.");
+                console.error(e);
+            }
+        };
+
+        window.cancelarEdicao = function() {
+            document.getElementById('produtoId').value = '';
+            document.getElementById('doceForm').reset();
+            
+            const titulo = document.getElementById('titulo-form-produto');
+            if (titulo) titulo.textContent = '➕ Adicionar Novo Produto';
+            
+            const btnCancelar = document.getElementById('btnCancelarEdicao');
+            if (btnCancelar) btnCancelar.style.display = 'none';
+        };
+
         function inicializarVitrine() {
             const listas = {
                 'PROMOCAO': 'listaPromocoes',
                 'SALGADOS': 'listaSalgados',
+                'CALDOS': 'listaCaldos',
                 'BOLOS': 'listaBolos',
                 'DOCES': 'listaDoces',
                 'BALAS DE COCO': 'listaBalas',
@@ -563,8 +684,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     produtos.forEach(p => {
                         const precoFormatado = parseFloat(p.preco).toFixed(2).replace('.', ',');
                         const nomeSeguro = escapeHtml(p.nome);
-                        const btnExcluir = estaNoModoAdmin
-                            ? `<button class="btn-remover" onclick="window.excluirProduto('${p.id}')" style="position:absolute;top:5px;right:5px;background:red;color:white;border:none;border-radius:50%;width:25px;height:25px;cursor:pointer;z-index:10;font-weight:bold;">×</button>`
+                        const botoesAdmin = estaNoModoAdmin
+                            ? `<div style="position:absolute;top:5px;right:5px;display:flex;gap:4px;z-index:10;">
+                                <button class="btn-editar" onclick="window.editarProduto('${p.id}')" style="background:#2196F3;color:white;border:none;border-radius:50%;width:25px;height:25px;cursor:pointer;font-weight:bold;font-size:0.9rem;" title="Editar">✏️</button>
+                                <button class="btn-remover" onclick="window.excluirProduto('${p.id}')" style="background:red;color:white;border:none;border-radius:50%;width:25px;height:25px;cursor:pointer;font-weight:bold;" title="Excluir">×</button>
+                               </div>`
                             : '';
                         const badgePromocao = p.categoria === 'PROMOCAO'
                             ? `<div style="background:#6d4c41;color:white;font-size:0.75rem;font-weight:bold;padding:4px 10px;text-align:center;">🔥 PROMOÇÃO</div>`
@@ -574,7 +698,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         card.className = 'card';
                         card.style.position = 'relative';
                         card.innerHTML = `
-                            ${btnExcluir}
+                            ${botoesAdmin}
                             ${badgePromocao}
                             <img src="${p.urlImagem}" alt="${p.nome}" onerror="this.src='https://via.placeholder.com/300x200?text=Imagem+nao+encontrada'">
                             <div class="card-content">
@@ -639,29 +763,45 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
 
-        // ========== FORMULÁRIO DE CADASTRO ==========
+        // ========== FORMULÁRIO DE CADASTRO/EDIÇÃO ==========
         const doceForm = document.getElementById('doceForm');
         if (doceForm) {
             doceForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
                 const btnSubmit = doceForm.querySelector('button[type="submit"]');
-                const textoOriginal = btnSubmit?.textContent || "Salvar na Nuvem";
+                const textoOriginal = btnSubmit?.textContent || "💾 Salvar Produto";
+                const produtoId = document.getElementById('produtoId').value;
+                
                 if (btnSubmit) {
                     btnSubmit.disabled = true;
                     btnSubmit.innerText = "Salvando...";
                 }
+                
                 try {
-                    await addDoc(produtosRef, {
+                    const dadosProduto = {
                         nome: document.getElementById('nome').value,
                         preco: document.getElementById('preco').value,
                         urlImagem: document.getElementById('urlImagem').value,
-                        categoria: document.getElementById('categoria').value,
-                        dataCriacao: new Date()
-                    });
-                    doceForm.reset();
-                    alert("Produto salvo com sucesso!");
+                        categoria: document.getElementById('categoria').value
+                    };
+                    
+                    if (produtoId) {
+                        // Modo edição - atualizar produto existente
+                        await updateDoc(doc(db, "produtos_v2", produtoId), dadosProduto);
+                        alert("✅ Produto atualizado com sucesso!");
+                        window.cancelarEdicao();
+                    } else {
+                        // Modo adicionar - criar novo produto
+                        await addDoc(produtosRef, {
+                            ...dadosProduto,
+                            dataCriacao: new Date()
+                        });
+                        doceForm.reset();
+                        alert("✅ Produto adicionado com sucesso!");
+                    }
                 } catch (err) {
-                    alert("Erro ao salvar. Verifique a conexão.");
+                    console.error("Erro ao salvar produto:", err);
+                    alert("❌ Erro ao salvar. Verifique a conexão.");
                 } finally {
                     if (btnSubmit) {
                         btnSubmit.disabled = false;
@@ -669,6 +809,12 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 }
             });
+        }
+        
+        // Botão cancelar edição
+        const btnCancelarEdicao = document.getElementById('btnCancelarEdicao');
+        if (btnCancelarEdicao) {
+            btnCancelarEdicao.addEventListener('click', window.cancelarEdicao);
         }
 
         // ========== PEDIDOS ==========
@@ -808,6 +954,7 @@ document.addEventListener('DOMContentLoaded', () => {
         carregarBanner();
         inicializarVitrine();
         carregarListaProdutosAdmin();
+        carregarListaProdutosGerenciar();
         monitorarPedidos();
 
         // Botão de salvar produtos

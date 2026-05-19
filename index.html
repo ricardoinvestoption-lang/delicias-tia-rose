@@ -134,6 +134,13 @@
                         <button class="btn-filtro" data-target="secao-salgados">Saiba mais</button>
                     </div>
                 </div>
+
+                <div class="card-categoria" style="background-image: linear-gradient(to top, rgba(0,0,0,0.8), transparent), url('https://i.postimg.cc/X7CZ5rYW/capa-caldo.jpg');">
+                    <div class="info-card">
+                        <h3>CALDOS</h3>
+                        <button class="btn-filtro" data-target="secao-caldos">Saiba mais</button>
+                    </div>
+                </div>
             </div>
 
             <div class="carrossel-indicadores" id="indicadoresCarrossel"></div>
@@ -166,21 +173,40 @@
                 <span id="statusSemana" style="margin-left:12px; font-size:0.85rem;"></span>
             </div>
 
-            <form id="doceForm">
-                <input type="text" id="nome" placeholder="Nome do Produto" required>
-                <input type="number" id="preco" placeholder="Preço" step="0.01" required>
-                <input type="url" id="urlImagem" placeholder="Link da Imagem" required>
-                <select id="categoria" required>
-                    <option value="" disabled selected>Selecione a Categoria</option>
-                    <option value="PROMOCAO">🔥 Promoção</option>
-                    <option value="DOCES">Doces</option>
-                    <option value="BALAS DE COCO">Balas de Coco</option>
-                    <option value="OVOS DE PASCOA">Ovos de Páscoa</option>
-                    <option value="BOLOS">Bolos</option>
-                    <option value="SALGADOS">Salgados</option>
-                </select>
-                <button type="submit" style="background: #25d366; color: white; padding: 10px; border: none; cursor: pointer; border-radius: 5px;">Salvar na Nuvem</button>
-            </form>
+            <div style="background:#faf7f2; border:1px solid #d7ccc8; border-radius:10px; padding:15px; margin-bottom:20px;">
+                <h3 style="margin:0 0 10px; color:#6d4c41;" id="titulo-form-produto">➕ Adicionar Novo Produto</h3>
+                <p style="font-size:0.85rem; color:#666; margin-bottom:15px;">Preencha os campos abaixo para adicionar um novo produto ao catálogo</p>
+                <form id="doceForm">
+                    <input type="hidden" id="produtoId" value="">
+                    <input type="text" id="nome" placeholder="Nome do Produto" required>
+                    <input type="number" id="preco" placeholder="Preço" step="0.01" required>
+                    <input type="url" id="urlImagem" placeholder="Link da Imagem" required>
+                    <select id="categoria" required>
+                        <option value="" disabled selected>Selecione a Categoria</option>
+                        <option value="PROMOCAO">🔥 Promoção</option>
+                        <option value="DOCES">Doces</option>
+                        <option value="BALAS DE COCO">Balas de Coco</option>
+                        <option value="OVOS DE PASCOA">Ovos de Páscoa</option>
+                        <option value="BOLOS">Bolos</option>
+                        <option value="SALGADOS">Salgados</option>
+                        <option value="CALDOS">Caldos</option>
+                    </select>
+                    <div style="display: flex; gap: 10px;">
+                        <button type="submit" style="flex: 1; background: #25d366; color: white; padding: 10px; border: none; cursor: pointer; border-radius: 8px; font-weight: bold;">💾 Salvar Produto</button>
+                        <button type="button" id="btnCancelarEdicao" style="display: none; flex: 1; background: #999; color: white; padding: 10px; border: none; cursor: pointer; border-radius: 8px; font-weight: bold;">❌ Cancelar</button>
+                    </div>
+                </form>
+            </div>
+
+            <div style="background:#faf7f2; border:1px solid #d7ccc8; border-radius:10px; padding:15px; margin-bottom:20px;">
+                <h3 style="margin:0 0 10px; color:#6d4c41;">📦 Gerenciar Produtos Cadastrados</h3>
+                <p style="font-size:0.85rem; color:#666; margin-bottom:15px;">
+                    Clique em <strong style="color:#2196F3;">✏️ Editar</strong> para modificar um produto ou em <strong style="color:red;">× Excluir</strong> para removê-lo
+                </p>
+                <div id="lista-produtos-gerenciar" style="max-height:400px; overflow-y:auto; border:1px solid #ddd; border-radius:8px; padding:10px; background:white;">
+                    <p style="color:#aaa; text-align:center;">Carregando produtos...</p>
+                </div>
+            </div>
 
             <div style="margin-top:30px; background:#fff; border:1px solid #ddd; border-radius:10px; padding:15px;">
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; flex-wrap:wrap; gap:10px;">
@@ -199,6 +225,11 @@
         <div id="secao-salgados" class="categoria-vitrine">
             <h3 class="titulo-categoria">🥐 Salgados</h3>
             <div id="listaSalgados" class="grid"></div>
+        </div>
+
+        <div id="secao-caldos" class="categoria-vitrine">
+            <h3 class="titulo-categoria">🍲 Caldos</h3>
+            <div id="listaCaldos" class="grid"></div>
         </div>
 
         <div id="secao-bolos" class="categoria-vitrine">
