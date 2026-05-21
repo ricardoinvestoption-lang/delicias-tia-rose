@@ -8,6 +8,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // 1. CARRINHO DE COMPRAS
     // =============================================
     let carrinho = [];
+    let modoEntrega = 'retirar';
+    const TAXA_ENTREGA = 5.00;
 
     function atualizarContador() {
         const total = carrinho.reduce((acc, item) => acc + item.quantidade, 0);
@@ -18,7 +20,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function calcularTotal() {
-        return carrinho.reduce((acc, item) => acc + (item.preco * item.quantidade), 0);
+        const subtotal = carrinho.reduce((acc, item) => acc + (item.preco * item.quantidade), 0);
+        return modoEntrega === 'entregar' ? subtotal + TAXA_ENTREGA : subtotal;
     }
 
     function formatarMoeda(valor) {
@@ -81,11 +84,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const totalDiv = document.createElement('div');
         totalDiv.className = 'carrinho-resumo';
+        const subtotal = carrinho.reduce((acc, item) => acc + (item.preco * item.quantidade), 0);
+        const taxaLinha = modoEntrega === 'entregar'
+            ? `<div class="carrinho-taxa-entrega"><span>Taxa de entrega:</span><span>+ ${formatarMoeda(TAXA_ENTREGA)}</span></div>`
+            : '';
         totalDiv.innerHTML = `
             <span>${carrinho.length} ${carrinho.length === 1 ? 'item' : 'itens'} no carrinho</span>
-            <span class="carrinho-total-destaque">${formatarMoeda(calcularTotal())}</span>
+            <span class="carrinho-total-destaque">${formatarMoeda(subtotal)}</span>
         `;
         lista.appendChild(totalDiv);
+
+        if (taxaLinha) {
+            const taxaDiv = document.createElement('div');
+            taxaDiv.innerHTML = taxaLinha;
+            lista.appendChild(taxaDiv);
+        }
 
         const totalValor = document.getElementById('carrinho-total-valor');
         if (totalValor) totalValor.textContent = formatarMoeda(calcularTotal());
@@ -107,12 +120,18 @@ document.addEventListener('DOMContentLoaded', () => {
         renderizarCarrinho();
     }
 
-    window.adicionarAoCarrinho = function(nome, preco) {
+    window.adicionarAoCarrinho = function(nome, preco, id, qtdDisponivel) {
         const existente = carrinho.find(i => i.nome === nome);
+        const qtdAtual = existente ? existente.quantidade : 0;
+
+        if (qtdDisponivel !== null && qtdDisponivel !== undefined && qtdAtual >= qtdDisponivel) {
+            return;
+        }
+
         if (existente) {
             existente.quantidade++;
         } else {
-            carrinho.push({ nome, preco: parseFloat(preco), quantidade: 1 });
+            carrinho.push({ nome, preco: parseFloat(preco), quantidade: 1, id: id || null, qtdDisponivel: qtdDisponivel || null });
         }
         atualizarContador();
 
@@ -124,9 +143,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 setTimeout(() => {
                     btn.textContent = textoOriginal;
                     btn.classList.remove('btn-adicionado');
+                    if (typeof window._atualizarVitrinheSemana === 'function') {
+                        window._atualizarVitrinheSemana();
+                    }
                 }, 1300);
             }
         });
+
+        if (typeof window._atualizarVitrinheSemana === 'function') {
+            setTimeout(window._atualizarVitrinheSemana, 1350);
+        }
     };
 
     function escapeHtml(text) {
@@ -181,14 +207,20 @@ document.addEventListener('DOMContentLoaded', () => {
             `• ${item.quantidade}x ${item.nome} — ${formatarMoeda(item.preco * item.quantidade)}`
         );
         const total = calcularTotal();
-        const mensagem = `Olá Rose! Eu sou *${nomeCliente}* e gostaria de fazer o seguinte pedido:\n\n${linhas.join('\n')}\n\n*Total: ${formatarMoeda(total)}*`;
+        const subtotal = carrinho.reduce((acc, item) => acc + (item.preco * item.quantidade), 0);
+        const entregaInfo = modoEntrega === 'entregar'
+            ? `\n🚚 *Entrega* (+R$ 5,00)`
+            : `\n🏠 *Retirada no local*`;
+        const totalLinha = modoEntrega === 'entregar'
+            ? `\nSubtotal: ${formatarMoeda(subtotal)}\nTaxa de entrega: +R$ 5,00\n*Total: ${formatarMoeda(total)}*`
+            : `\n*Total: ${formatarMoeda(total)}*`;
+        const mensagem = `Olá Rose! Eu sou *${nomeCliente}* e gostaria de fazer o seguinte pedido:\n\n${linhas.join('\n')}${entregaInfo}${totalLinha}`;
 
         const fone = "5516991839509";
         window.location.href = `https://wa.me/${fone}?text=${encodeURIComponent(mensagem)}`;
 
         fecharModalPedido();
 
-        // Salvar no Firestore se disponível
         if (window.db && window.dbMetodos) {
             const { collection, addDoc, serverTimestamp } = window.dbMetodos;
             const dataHora = serverTimestamp();
@@ -198,6 +230,8 @@ document.addEventListener('DOMContentLoaded', () => {
                         cliente: nomeCliente,
                         produto: `${item.quantidade}x ${item.nome}`,
                         valor: (item.preco * item.quantidade).toFixed(2),
+                        entrega: modoEntrega,
+                        taxaEntrega: modoEntrega === 'entregar' ? TAXA_ENTREGA : 0,
                         status: "novo",
                         data: dataHora
                     });
@@ -208,6 +242,11 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         carrinho = [];
+        modoEntrega = 'retirar';
+        const btnRetirar = document.getElementById('btn-retirar');
+        const btnEntregar = document.getElementById('btn-entregar');
+        if (btnRetirar) btnRetirar.classList.add('btn-entrega-ativo');
+        if (btnEntregar) btnEntregar.classList.remove('btn-entrega-ativo');
         atualizarContador();
     }
 
@@ -419,11 +458,14 @@ document.addEventListener('DOMContentLoaded', () => {
         };
 
         // ========== PRODUTOS DA SEMANA ==========
+        let quantidadesSemana = {};
+
         async function carregarProdutosSemana() {
             try {
                 const semanaDoc = await getDoc(doc(db, "configuracoes", "produtos_semana"));
                 if (semanaDoc.exists()) {
                     produtosIdsSemana = semanaDoc.data().produtosIds || [];
+                    quantidadesSemana = semanaDoc.data().quantidades || {};
                 }
             } catch (e) {
                 console.error("Erro ao carregar produtos da semana:", e);
@@ -432,8 +474,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
         window.salvarProdutosSemana = async function() {
             const idsSelecionados = [];
+            const quantidadesSalvar = {};
             document.querySelectorAll('.checkbox-produto-semana:checked').forEach(cb => {
                 idsSelecionados.push(cb.value);
+            });
+            document.querySelectorAll('.input-qtd-semana').forEach(inp => {
+                const val = parseInt(inp.value);
+                if (inp.dataset.id && val > 0) {
+                    quantidadesSalvar[inp.dataset.id] = val;
+                }
             });
             
             if (idsSelecionados.length === 0) {
@@ -444,9 +493,11 @@ document.addEventListener('DOMContentLoaded', () => {
             try {
                 await setDoc(doc(db, "configuracoes", "produtos_semana"), {
                     produtosIds: idsSelecionados,
+                    quantidades: quantidadesSalvar,
                     atualizadoEm: new Date()
                 });
                 produtosIdsSemana = idsSelecionados;
+                quantidadesSemana = quantidadesSalvar;
                 const statusSpan = document.getElementById('statusSemana');
                 if (statusSpan) {
                     statusSpan.innerHTML = '✅ Salvo!';
@@ -499,6 +550,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     
                     produtos.forEach(p => {
                         const precoFormatado = parseFloat(p.preco).toFixed(2).replace('.', ',');
+                        const qtdSalva = quantidadesSemana[p.id] || '';
                         const label = document.createElement('label');
                         label.className = 'checkbox-produto-item';
                         label.innerHTML = `
@@ -507,6 +559,10 @@ document.addEventListener('DOMContentLoaded', () => {
                             <div class="info">
                                 <div class="nome">${escapeHtml(p.nome)}</div>
                                 <div class="preco">R$ ${precoFormatado}</div>
+                            </div>
+                            <div class="qtd-admin-wrap" onclick="event.preventDefault()">
+                                <span class="qtd-admin-label">Qtd:</span>
+                                <input type="number" class="input-qtd-semana" data-id="${p.id}" min="1" placeholder="∞" value="${qtdSalva}" title="Quantidade disponível desta semana">
                             </div>
                         `;
                         catDiv.appendChild(label);
@@ -716,50 +772,58 @@ document.addEventListener('DOMContentLoaded', () => {
                     });
                 }
 
-                // Seção "Nesta Semana"
-                const secaoSemana = document.getElementById('secao-promocoes');
-                const containerSemana = document.getElementById('listaPromocoes');
-                
-                if (secaoSemana && containerSemana) {
-                    containerSemana.innerHTML = '';
+                function renderizarVitrinheSemana() {
+                    const secaoSemana = document.getElementById('secao-promocoes');
+                    const containerSemana = document.getElementById('listaPromocoes');
                     
-                    const produtosSemana = produtosIdsSemana
-                        .map(id => produtosPorId[id])
-                        .filter(p => p !== undefined);
-                    
-                    if (produtosSemana.length === 0) {
-                        containerSemana.innerHTML = '<p style="text-align:center;color:#aaa;padding:40px;">Nenhum produto selecionado para esta semana. Acesse o modo Admin e escolha os produtos.</p>';
-                    } else {
-                        produtosSemana.forEach(p => {
-                            const precoFormatado = parseFloat(p.preco).toFixed(2).replace('.', ',');
-                            const nomeSeguro = escapeHtml(p.nome);
-                            const btnExcluir = (adminSection && adminSection.style.display === 'block')
-                                ? `<button class="btn-remover" onclick="window.excluirProduto('${p.id}')" style="position:absolute;top:5px;right:5px;background:red;color:white;border:none;border-radius:50%;width:25px;height:25px;cursor:pointer;z-index:10;font-weight:bold;">×</button>`
-                                : '';
-                            
-                            const card = document.createElement('div');
-                            card.className = 'card';
-                            card.style.position = 'relative';
-                            card.innerHTML = `
-                                ${btnExcluir}
-                                <img src="${p.urlImagem}" alt="${p.nome}" onerror="this.src='https://via.placeholder.com/300x200?text=Sem+imagem'">
-                                <div class="card-content">
-                                    <h3 class="card-name">${escapeHtml(p.nome)}</h3>
-                                    <p class="card-price">R$ ${precoFormatado}</p>
-                                    <button
-                                        class="btn-whats btn-adicionar-carrinho"
-                                        data-nome="${p.nome}"
-                                        onclick="adicionarAoCarrinho('${nomeSeguro.replace(/'/g, "\\'")}', '${p.preco}')">
-                                        🛒 Adicionar
-                                    </button>
-                                </div>
-                            `;
-                            containerSemana.appendChild(card);
-                        });
+                    if (secaoSemana && containerSemana) {
+                        containerSemana.innerHTML = '';
+                        
+                        const produtosSemana = produtosIdsSemana
+                            .map(id => produtosPorId[id])
+                            .filter(p => p !== undefined);
+                        
+                        if (produtosSemana.length === 0) {
+                            containerSemana.innerHTML = '<p style="text-align:center;color:#aaa;padding:40px;">Nenhum produto selecionado para esta semana. Acesse o modo Admin e escolha os produtos.</p>';
+                        } else {
+                            produtosSemana.forEach(p => {
+                                const precoFormatado = parseFloat(p.preco).toFixed(2).replace('.', ',');
+                                const nomeSeguro = escapeHtml(p.nome);
+                                const btnExcluir = (adminSection && adminSection.style.display === 'block')
+                                    ? `<button class="btn-remover" onclick="window.excluirProduto('${p.id}')" style="position:absolute;top:5px;right:5px;background:red;color:white;border:none;border-radius:50%;width:25px;height:25px;cursor:pointer;z-index:10;font-weight:bold;">×</button>`
+                                    : '';
+
+                                const qtdDisponivel = quantidadesSemana[p.id] ? parseInt(quantidadesSemana[p.id]) : null;
+                                const pedidosItem = carrinho.find(i => i.nome === p.nome);
+                                const qtdNoCarrinho = pedidosItem ? pedidosItem.quantidade : 0;
+                                const esgotado = qtdDisponivel !== null && qtdNoCarrinho >= qtdDisponivel;
+
+                                const btnAdicionar = esgotado
+                                    ? `<button class="btn-whats btn-indisponivel" disabled>Produto Indisponível</button>`
+                                    : `<button class="btn-whats btn-adicionar-carrinho" data-nome="${p.nome}" data-id="${p.id}" data-qtd-disponivel="${qtdDisponivel !== null ? qtdDisponivel : ''}" onclick="adicionarAoCarrinho('${nomeSeguro.replace(/'/g, "\\'")}', '${p.preco}', '${p.id}', ${qtdDisponivel !== null ? qtdDisponivel : 'null'})">🛒 Adicionar</button>`;
+                                
+                                const card = document.createElement('div');
+                                card.className = 'card';
+                                card.style.position = 'relative';
+                                card.innerHTML = `
+                                    ${btnExcluir}
+                                    <img src="${p.urlImagem}" alt="${p.nome}" onerror="this.src='https://via.placeholder.com/300x200?text=Sem+imagem'">
+                                    <div class="card-content">
+                                        <h3 class="card-name">${escapeHtml(p.nome)}</h3>
+                                        <p class="card-price">R$ ${precoFormatado}</p>
+                                        ${btnAdicionar}
+                                    </div>
+                                `;
+                                containerSemana.appendChild(card);
+                            });
+                        }
+                        secaoSemana.style.display = 'block';
+                        secaoSemana.classList.add('visivel');
                     }
-                    secaoSemana.style.display = 'block';
-                    secaoSemana.classList.add('visivel');
                 }
+
+                window._atualizarVitrinheSemana = renderizarVitrinheSemana;
+                renderizarVitrinheSemana();
             });
         }
 
@@ -1028,6 +1092,26 @@ document.addEventListener('DOMContentLoaded', () => {
     if (modalCarrinho) {
         modalCarrinho.addEventListener('click', (e) => {
             if (e.target === modalCarrinho) fecharCarrinho();
+        });
+    }
+
+    // Botões Retirar / Entregar
+    const btnRetirar = document.getElementById('btn-retirar');
+    const btnEntregar = document.getElementById('btn-entregar');
+    if (btnRetirar) {
+        btnRetirar.addEventListener('click', () => {
+            modoEntrega = 'retirar';
+            btnRetirar.classList.add('btn-entrega-ativo');
+            btnEntregar.classList.remove('btn-entrega-ativo');
+            renderizarCarrinho();
+        });
+    }
+    if (btnEntregar) {
+        btnEntregar.addEventListener('click', () => {
+            modoEntrega = 'entregar';
+            btnEntregar.classList.add('btn-entrega-ativo');
+            btnRetirar.classList.remove('btn-entrega-ativo');
+            renderizarCarrinho();
         });
     }
 

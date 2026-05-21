@@ -830,7 +830,110 @@ header h1:hover {
     margin-top: 2px;
 }
 
-/* --- ANIMAÇÕES --- */
+/* --- BOTÃO INDISPONÍVEL (NESTA SEMANA) --- */
+.btn-indisponivel {
+    background-color: #bdbdbd !important;
+    color: #fff !important;
+    cursor: not-allowed !important;
+    opacity: 0.8;
+}
+
+.btn-indisponivel:hover {
+    background-color: #bdbdbd !important;
+    transform: none !important;
+}
+
+/* --- CAMPO QUANTIDADE ADMIN (SEMANA) --- */
+.qtd-admin-wrap {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin-left: auto;
+    flex-shrink: 0;
+}
+
+.qtd-admin-label {
+    font-size: 0.78rem;
+    color: #888;
+    white-space: nowrap;
+}
+
+.input-qtd-semana {
+    width: 60px;
+    padding: 5px 7px;
+    border: 1px solid #ddd;
+    border-radius: 7px;
+    font-size: 0.85rem;
+    text-align: center;
+    color: #6d4c41;
+    font-weight: 600;
+    box-sizing: border-box;
+}
+
+.input-qtd-semana:focus {
+    outline: none;
+    border-color: var(--marrom-principal);
+}
+
+/* --- OPÇÃO RETIRAR / ENTREGAR NO CARRINHO --- */
+#opcao-entrega {
+    margin-bottom: 12px;
+}
+
+#opcao-entrega-label {
+    display: block;
+    font-size: 0.82rem;
+    color: #888;
+    margin-bottom: 7px;
+    font-weight: 500;
+}
+
+#opcao-entrega-botoes {
+    display: flex;
+    gap: 8px;
+}
+
+.btn-entrega {
+    flex: 1;
+    padding: 9px 8px;
+    border: 1.5px solid #ddd;
+    border-radius: 10px;
+    background: var(--branco);
+    color: #666;
+    font-size: 0.88rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-entrega:hover {
+    border-color: var(--marrom-principal);
+    color: var(--marrom-principal);
+}
+
+.btn-entrega-ativo {
+    background: var(--marrom-principal);
+    border-color: var(--marrom-principal);
+    color: white !important;
+}
+
+.btn-entrega-ativo:hover {
+    background: var(--marrom-escuro);
+    border-color: var(--marrom-escuro);
+    color: white !important;
+}
+
+/* --- LINHA TAXA ENTREGA NO CARRINHO --- */
+.carrinho-taxa-entrega {
+    display: flex;
+    justify-content: space-between;
+    padding: 6px 14px 0;
+    font-size: 0.85rem;
+    color: var(--marrom-principal);
+    font-weight: 600;
+}
+
+/* --- FIM DO CSS DE ALTERAÇÕES --- */
 @keyframes fadeInDown {
     from { 
         opacity: 0; 
