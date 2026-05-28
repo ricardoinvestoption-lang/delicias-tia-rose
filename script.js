@@ -1448,4 +1448,214 @@ document.addEventListener('DOMContentLoaded', () => {
     // Inicializar Firebase e tudo
     inicializarFirebase();
     inicializarIndicadores();
+
+    // =============================================
+    // 8. PRINT E COMPARTILHAMENTO DE PRODUTOS DA SEMANA
+    // =============================================
+    let imagemCapturada = null;
+
+    window.abrirPrintSemana = function() {
+        const modal = document.getElementById('modal-print-semana');
+        const conteudo = document.getElementById('conteudo-print-semana');
+        if (!modal || !conteudo) return;
+
+        // Recolher dados dos produtos da semana
+        const listaPromocoes = document.getElementById('listaPromocoes');
+        if (!listaPromocoes || !listaPromocoes.querySelector('.card')) {
+            alert('Nenhum produto selecionado para esta semana.');
+            return;
+        }
+
+        // Extrair informações dos produtos
+        const produtos = [];
+        listaPromocoes.querySelectorAll('.card').forEach(card => {
+            const nome = card.querySelector('.card-name')?.textContent || 'Produto';
+            const preco = card.querySelector('.card-price')?.textContent || 'R$ 0,00';
+            const img = card.querySelector('img')?.src || '';
+            produtos.push({ nome, preco, img });
+        });
+
+        // Gerar HTML para preview
+        const dataAtual = new Date().toLocaleDateString('pt-BR', { 
+            weekday: 'long', 
+            day: '2-digit', 
+            month: 'long',
+            year: 'numeric'
+        }).replace(/^[a-z]/, c => c.toUpperCase());
+
+        const htmlProdutos = produtos.map(p => `
+            <div style="display: flex; gap: 12px; margin-bottom: 12px; background: white; padding: 12px; border-radius: 10px; border: 1px solid #e0e0e0;">
+                <img src="${p.img}" alt="" style="width: 60px; height: 60px; object-fit: cover; border-radius: 8px;">
+                <div style="flex: 1;">
+                    <div style="font-weight: bold; color: #333; margin-bottom: 4px;">${escapeHtml(p.nome)}</div>
+                    <div style="color: #6d4c41; font-weight: bold; font-size: 1rem;">${p.preco}</div>
+                </div>
+            </div>
+        `).join('');
+
+        conteudo.innerHTML = `
+            <div style="text-align: center; margin-bottom: 24px;">
+                <img src="logo.png" alt="Logo" style="width: 60px; height: 60px; margin-bottom: 12px; object-fit: contain;">
+                <h2 style="color: #6d4c41; margin: 0 0 8px; font-size: 1.4rem;">🌸 Delícias da Tia Rose</h2>
+                <p style="color: #888; margin: 0; font-size: 0.9rem;">Doces feitos com amor</p>
+            </div>
+            
+            <div style="background: linear-gradient(135deg, #6d4c41, #5d4037); color: white; padding: 12px; border-radius: 12px; text-align: center; margin-bottom: 20px;">
+                <div style="font-size: 1.2rem; font-weight: bold; margin-bottom: 4px;">🔥 Nesta Semana</div>
+                <div style="font-size: 0.9rem;">${dataAtual}</div>
+            </div>
+            
+            <div style="margin-bottom: 20px;">
+                ${htmlProdutos}
+            </div>
+            
+            <div style="background: #faf7f2; padding: 14px; border-radius: 10px; border: 2px solid #6d4c41; margin-bottom: 16px; text-align: center;">
+                <div style="font-size: 1.1rem; font-weight: bold; color: #6d4c41; margin-bottom: 8px;">📞 Para Pedir!</div>
+                <div style="color: #333; font-size: 0.95rem; margin-bottom: 6px;">
+                    <strong>Rose</strong> 🌸
+                </div>
+                <div style="color: #25d366; font-weight: bold; font-size: 1rem; margin-bottom: 8px;">
+                    WhatsApp: <strong>(16) 99183-9509</strong>
+                </div>
+                <div style="font-size: 0.85rem; color: #666;">
+                    📱 <u>Baixe nosso App!</u>
+                </div>
+            </div>
+            
+            <div style="text-align: center; font-size: 0.8rem; color: #aaa;">
+                Compartilhado em ${dataAtual}
+            </div>
+        `;
+
+        modal.style.display = 'flex';
+    };
+
+    window.capturarImagemPrint = async function() {
+        const conteudo = document.getElementById('conteudo-print-semana');
+        if (!conteudo) return false;
+
+        try {
+            // Mostrar feedback
+            const btnCapturar = document.getElementById('btn-salvar-imagem');
+            const textOriginal = btnCapturar?.textContent || '⬇️ Salvar Imagem';
+            if (btnCapturar) {
+                btnCapturar.disabled = true;
+                btnCapturar.textContent = '⏳ Capturando...';
+            }
+
+            // Capturar elemento como imagem
+            const canvas = await html2canvas(conteudo, {
+                backgroundColor: '#faf7f2',
+                scale: 2,
+                logging: false,
+                useCORS: true,
+                allowTaint: true,
+                windowHeight: conteudo.scrollHeight
+            });
+
+            imagemCapturada = canvas;
+
+            // Restaurar botão
+            if (btnCapturar) {
+                btnCapturar.disabled = false;
+                btnCapturar.textContent = textOriginal;
+            }
+
+            return true;
+        } catch (error) {
+            console.error('Erro ao capturar imagem:', error);
+            alert('Erro ao gerar imagem. Tente novamente.');
+            const btnCapturar = document.getElementById('btn-salvar-imagem');
+            if (btnCapturar) btnCapturar.textContent = '⬇️ Salvar Imagem';
+            return false;
+        }
+    };
+
+    window.salvarImagemPrint = async function() {
+        if (!imagemCapturada) {
+            const capturou = await window.capturarImagemPrint();
+            if (!capturou) return;
+        }
+
+        // Converter canvas para blob e fazer download
+        imagemCapturada.toBlob((blob) => {
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `Delicias-Tia-Rose-${new Date().getTime()}.png`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+        });
+    };
+
+    window.enviarPrintWhatsApp = async function() {
+        if (!imagemCapturada) {
+            const capturou = await window.capturarImagemPrint();
+            if (!capturou) return;
+        }
+
+        // Converter imagem em arquivo
+        imagemCapturada.toBlob(async (blob) => {
+            // Para enviar imagem via WhatsApp web link, temos limitações
+            // Então vamos enviar um link de texto com informações
+            const mensagem = `
+🌸 *Delícias da Tia Rose* - Nesta Semana!
+
+Confira os produtos desta semana diretamente no nosso app ou site:
+
+📱 *Link do App:* https://ricardoinvestoption-lang.github.io/delicias-tia-rose/
+
+Ou entre em contato:
+📞 WhatsApp: (16) 99183-9509
+✨ Rose - Seus doces feitos com amor!
+            `.trim();
+
+            const fone = "5516991839509";
+            const urlWhatsApp = `https://wa.me/${fone}?text=${encodeURIComponent(mensagem)}`;
+            
+            window.open(urlWhatsApp, '_blank');
+
+            // Fechar modal após enviar
+            setTimeout(() => {
+                const modal = document.getElementById('modal-print-semana');
+                if (modal) modal.style.display = 'none';
+            }, 500);
+        });
+    };
+
+    // Event listeners para o botão de print
+    const btnPrintSemana = document.getElementById('btnPrintSemana');
+    if (btnPrintSemana) {
+        btnPrintSemana.addEventListener('click', window.abrirPrintSemana);
+    }
+
+    const btnSalvarImagem = document.getElementById('btn-salvar-imagem');
+    if (btnSalvarImagem) {
+        btnSalvarImagem.addEventListener('click', window.salvarImagemPrint);
+    }
+
+    const btnEnviarWhatsApp = document.getElementById('btn-enviar-whatsapp');
+    if (btnEnviarWhatsApp) {
+        btnEnviarWhatsApp.addEventListener('click', window.enviarPrintWhatsApp);
+    }
+
+    const fecharPrintSemana = document.getElementById('fechar-print-semana');
+    if (fecharPrintSemana) {
+        fecharPrintSemana.addEventListener('click', () => {
+            const modal = document.getElementById('modal-print-semana');
+            if (modal) modal.style.display = 'none';
+        });
+    }
+
+    // Fechar modal ao clicar fora
+    const modalPrint = document.getElementById('modal-print-semana');
+    if (modalPrint) {
+        modalPrint.addEventListener('click', (e) => {
+            if (e.target === modalPrint) {
+                modalPrint.style.display = 'none';
+            }
+        });
+    }
 });

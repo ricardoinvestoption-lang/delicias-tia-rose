@@ -536,6 +536,46 @@ header h1:hover {
     transform: scale(0.98);
 }
 
+/* --- BOTÃO DE PRINT DA SEMANA --- */
+#btnPrintSemana {
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(37, 211, 102, 0.3);
+}
+
+#btnPrintSemana:hover {
+    background: #1da851;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(37, 211, 102, 0.4);
+}
+
+#btnPrintSemana:active {
+    transform: translateY(0);
+}
+
+/* --- ANIMAÇÕES GERAIS --- */
+@keyframes fadeInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(40px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+
 /* --- MODAL DO CARRINHO --- */
 #modal-carrinho {
     display: none;

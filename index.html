@@ -5,6 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
     <title>Delícias da Tia Rose</title>
 
+    <!-- Open Graph / Social Media -->
+    <meta property="og:title" content="Delícias da Tia Rose - Instale nosso App!">
+    <meta property="og:description" content="Clique aqui, conheça nosso cardápio e instale o nosso aplicativo direto no seu celular!">
+    <meta property="og:image" content="https://ricardoinvestoption-lang.github.io/delicias-tia-rose/logo.png">
+    <meta property="og:url" content="https://ricardoinvestoption-lang.github.io/delicias-tia-rose/">
+    <meta property="og:image" content="https://ricardoinvestoption-lang.github.io/delicias-tia-rose/logo.png?v=1">
+
     <!-- PWA -->
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#6d4c41">
@@ -29,6 +36,28 @@
                     <button id="modal-btn-cancelar">Cancelar</button>
                     <button id="modal-btn-confirmar">Enviar no WhatsApp ✅</button>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL DE PRINT DOS PRODUTOS DA SEMANA -->
+    <div id="modal-print-semana" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 9999; align-items: center; justify-content: center; padding: 20px; box-sizing: border-box;">
+        <div style="background: white; border-radius: 20px; width: 100%; max-width: 500px; max-height: 90vh; overflow-y: auto; box-shadow: 0 10px 40px rgba(0,0,0,0.3);">
+            <!-- Header do Modal -->
+            <div style="background: linear-gradient(135deg, #6d4c41, #5d4037); color: white; padding: 20px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 10;">
+                <span style="font-size: 1.1rem; font-weight: 600;">📸 Visualizar Compartilhamento</span>
+                <button id="fechar-print-semana" style="background: rgba(255,255,255,0.2); border: none; color: white; font-size: 1.5rem; cursor: pointer; padding: 0; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center;">✕</button>
+            </div>
+            
+            <!-- Conteúdo do Preview (vai ser capturado como screenshot) -->
+            <div id="conteudo-print-semana" style="padding: 24px; background: #faf7f2;">
+                <!-- Será preenchido dinamicamente pelo JavaScript -->
+            </div>
+            
+            <!-- Footer com Botões de Ação -->
+            <div style="padding: 20px; border-top: 1px solid #e0e0e0; display: flex; gap: 10px; flex-wrap: wrap;">
+                <button id="btn-salvar-imagem" style="flex: 1; min-width: 120px; background: #2196F3; color: white; border: none; padding: 12px; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 0.95rem; display: flex; align-items: center; justify-content: center; gap: 6px;">⬇️ Salvar Imagem</button>
+                <button id="btn-enviar-whatsapp" style="flex: 1; min-width: 120px; background: #25d366; color: white; border: none; padding: 12px; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 0.95rem; display: flex; align-items: center; justify-content: center; gap: 6px;">💬 Enviar WhatsApp</button>
             </div>
         </div>
     </div>
@@ -225,7 +254,10 @@
         </section>
 
         <div id="secao-promocoes" class="categoria-vitrine vitrine-promocao">
-            <h3 class="titulo-categoria titulo-promocao">🔥 Nesta Semana</h3>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; gap: 10px; flex-wrap: wrap;">
+                <h3 class="titulo-categoria titulo-promocao" style="margin: 0; flex: 1;">🔥 Nesta Semana</h3>
+                <button id="btnPrintSemana" style="background: #25d366; color: white; border: none; padding: 10px 18px; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 0.95rem; display: flex; align-items: center; gap: 6px; white-space: nowrap;">📸 Compartilhar no WhatsApp</button>
+            </div>
             <div id="listaPromocoes" class="grid"></div>
         </div>
 
@@ -284,6 +316,9 @@
         // Disparar evento para indicar que Firebase está pronto
         window.dispatchEvent(new CustomEvent('firebase-ready'));
     </script>
+
+    <!-- Biblioteca html2canvas para capturar elementos como imagem -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
     <!-- Script principal (carregado após Firebase) -->
     <script src="script.js"></script>
