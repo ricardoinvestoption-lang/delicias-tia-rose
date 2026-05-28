@@ -1527,6 +1527,13 @@ document.addEventListener('DOMContentLoaded', () => {
             </div>
         `;
 
+        // Mostrar/esconder botão de compartilhar baseado no modo admin
+        const estaNoModoAdmin = adminSection && adminSection.style.display === 'block';
+        const btnCompartilhar = document.getElementById('btn-compartilhar-contatos');
+        if (btnCompartilhar) {
+            btnCompartilhar.style.display = estaNoModoAdmin ? 'flex' : 'none';
+        }
+
         modal.style.display = 'flex';
     };
 
@@ -1590,39 +1597,113 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     };
 
+    window.compartilharImagemContatos = async function() {
+        if (!imagemCapturada) {
+            const capturou = await window.capturarImagemPrint();
+            if (!capturou) return;
+        }
+
+        // Converter canvas para blob
+        imagemCapturada.toBlob(async (blob) => {
+            try {
+                // Tentar usar Web Share API (funciona bem em celulares)
+                if (navigator.share) {
+                    const arquivo = new File([blob], `Delicias-Tia-Rose-${new Date().getTime()}.png`, { type: 'image/png' });
+                    
+                    await navigator.share({
+                        title: '🌸 Delícias da Tia Rose',
+                        text: 'Confira os produtos desta semana! Feitos com amor pela Rose 💕',
+                        files: [arquivo]
+                    });
+                    
+                    // Fechar modais após compartilhar
+                    setTimeout(() => {
+                        const modal1 = document.getElementById('modal-print-semana');
+                        if (modal1) modal1.style.display = 'none';
+                    }, 500);
+                } else {
+                    // Fallback: Se Web Share API não disponível, faz download
+                    const url = URL.createObjectURL(blob);
+                    const link = document.createElement('a');
+                    link.href = url;
+                    link.download = `Delicias-Tia-Rose-${new Date().getTime()}.png`;
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    URL.revokeObjectURL(url);
+                    
+                    alert('✅ Imagem baixada! Você pode compartilhá-la manualmente no WhatsApp.');
+                }
+            } catch (error) {
+                console.error('Erro ao compartilhar:', error);
+                alert('Erro ao compartilhar. Tente novamente.');
+            }
+        });
+    };
+
     window.enviarPrintWhatsApp = async function() {
         if (!imagemCapturada) {
             const capturou = await window.capturarImagemPrint();
             if (!capturou) return;
         }
 
-        // Converter imagem em arquivo
-        imagemCapturada.toBlob(async (blob) => {
-            // Para enviar imagem via WhatsApp web link, temos limitações
-            // Então vamos enviar um link de texto com informações
-            const mensagem = `
+        // Abrir modal de escolha de contato
+        const modal = document.getElementById('modal-escolher-whatsapp');
+        if (modal) modal.style.display = 'flex';
+    };
+
+    window.enviarParaRose = async function() {
+        const mensagem = `
 🌸 *Delícias da Tia Rose* - Nesta Semana!
 
-Confira os produtos desta semana diretamente no nosso app ou site:
+Confira os produtos desta semana e faça seu pedido! 😋
 
 📱 *Link do App:* https://ricardoinvestoption-lang.github.io/delicias-tia-rose/
 
 Ou entre em contato:
 📞 WhatsApp: (16) 99183-9509
 ✨ Rose - Seus doces feitos com amor!
-            `.trim();
+        `.trim();
 
-            const fone = "5516991839509";
-            const urlWhatsApp = `https://wa.me/${fone}?text=${encodeURIComponent(mensagem)}`;
-            
-            window.open(urlWhatsApp, '_blank');
+        const fone = "5516991839509";
+        const urlWhatsApp = `https://wa.me/${fone}?text=${encodeURIComponent(mensagem)}`;
+        
+        window.open(urlWhatsApp, '_blank');
 
-            // Fechar modal após enviar
-            setTimeout(() => {
-                const modal = document.getElementById('modal-print-semana');
-                if (modal) modal.style.display = 'none';
-            }, 500);
-        });
+        // Fechar modais
+        setTimeout(() => {
+            const modal1 = document.getElementById('modal-print-semana');
+            const modal2 = document.getElementById('modal-escolher-whatsapp');
+            if (modal1) modal1.style.display = 'none';
+            if (modal2) modal2.style.display = 'none';
+        }, 500);
+    };
+
+    window.enviarParaContatos = async function() {
+        const mensagem = `
+🌸 *Delícias da Tia Rose* - Nesta Semana!
+
+Veja os produtos desta semana que Rose está oferecendo! 😋
+
+📱 *Link do App:* https://ricardoinvestoption-lang.github.io/delicias-tia-rose/
+
+Vendedora: Rose
+📞 WhatsApp: (16) 99183-9509
+✨ Doces feitos com amor!
+        `.trim();
+
+        // Sem número específico, abre a lista de contatos
+        const urlWhatsApp = `https://wa.me/?text=${encodeURIComponent(mensagem)}`;
+        
+        window.open(urlWhatsApp, '_blank');
+
+        // Fechar modais
+        setTimeout(() => {
+            const modal1 = document.getElementById('modal-print-semana');
+            const modal2 = document.getElementById('modal-escolher-whatsapp');
+            if (modal1) modal1.style.display = 'none';
+            if (modal2) modal2.style.display = 'none';
+        }, 500);
     };
 
     // Event listeners para o botão de print
@@ -1634,6 +1715,11 @@ Ou entre em contato:
     const btnSalvarImagem = document.getElementById('btn-salvar-imagem');
     if (btnSalvarImagem) {
         btnSalvarImagem.addEventListener('click', window.salvarImagemPrint);
+    }
+
+    const btnCompartilharContatos = document.getElementById('btn-compartilhar-contatos');
+    if (btnCompartilharContatos) {
+        btnCompartilharContatos.addEventListener('click', window.compartilharImagemContatos);
     }
 
     const btnEnviarWhatsApp = document.getElementById('btn-enviar-whatsapp');
@@ -1649,12 +1735,55 @@ Ou entre em contato:
         });
     }
 
-    // Fechar modal ao clicar fora
+    // Fechar modal de print ao clicar fora
     const modalPrint = document.getElementById('modal-print-semana');
     if (modalPrint) {
         modalPrint.addEventListener('click', (e) => {
             if (e.target === modalPrint) {
                 modalPrint.style.display = 'none';
+            }
+        });
+    }
+
+    // Event listeners para o modal de escolha de contato WhatsApp
+    const btnWhatsAppRose = document.getElementById('btn-whatsapp-rose');
+    if (btnWhatsAppRose) {
+        btnWhatsAppRose.addEventListener('click', window.enviarParaRose);
+        btnWhatsAppRose.addEventListener('mouseover', function() {
+            this.style.background = '#f0f0f0';
+            this.style.borderColor = '#25d366';
+        });
+        btnWhatsAppRose.addEventListener('mouseout', function() {
+            this.style.background = 'white';
+        });
+    }
+
+    const btnWhatsAppContatos = document.getElementById('btn-whatsapp-contatos');
+    if (btnWhatsAppContatos) {
+        btnWhatsAppContatos.addEventListener('click', window.enviarParaContatos);
+        btnWhatsAppContatos.addEventListener('mouseover', function() {
+            this.style.background = '#f0f0f0';
+            this.style.borderColor = '#2196F3';
+        });
+        btnWhatsAppContatos.addEventListener('mouseout', function() {
+            this.style.background = 'white';
+        });
+    }
+
+    const btnCancelarWhatsApp = document.getElementById('btn-cancelar-whatsapp');
+    if (btnCancelarWhatsApp) {
+        btnCancelarWhatsApp.addEventListener('click', () => {
+            const modal = document.getElementById('modal-escolher-whatsapp');
+            if (modal) modal.style.display = 'none';
+        });
+    }
+
+    // Fechar modal de contatos ao clicar fora
+    const modalEscolher = document.getElementById('modal-escolher-whatsapp');
+    if (modalEscolher) {
+        modalEscolher.addEventListener('click', (e) => {
+            if (e.target === modalEscolher) {
+                modalEscolher.style.display = 'none';
             }
         });
     }

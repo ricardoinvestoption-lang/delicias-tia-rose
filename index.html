@@ -57,7 +57,49 @@
             <!-- Footer com Botões de Ação -->
             <div style="padding: 20px; border-top: 1px solid #e0e0e0; display: flex; gap: 10px; flex-wrap: wrap;">
                 <button id="btn-salvar-imagem" style="flex: 1; min-width: 120px; background: #2196F3; color: white; border: none; padding: 12px; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 0.95rem; display: flex; align-items: center; justify-content: center; gap: 6px;">⬇️ Salvar Imagem</button>
+                <button id="btn-compartilhar-contatos" style="flex: 1; min-width: 120px; background: #FF9800; color: white; border: none; padding: 12px; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 0.95rem; display: flex; align-items: center; justify-content: center; gap: 6px; display: none;">📤 Compartilhar</button>
                 <button id="btn-enviar-whatsapp" style="flex: 1; min-width: 120px; background: #25d366; color: white; border: none; padding: 12px; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 0.95rem; display: flex; align-items: center; justify-content: center; gap: 6px;">💬 Enviar WhatsApp</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL DE ESCOLHA DE CONTATO WHATSAPP -->
+    <div id="modal-escolher-whatsapp" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 10000; align-items: center; justify-content: center; padding: 20px; box-sizing: border-box;">
+        <div style="background: white; border-radius: 20px; width: 100%; max-width: 420px; box-shadow: 0 10px 40px rgba(0,0,0,0.3);">
+            <!-- Header -->
+            <div style="background: linear-gradient(135deg, #25d366, #1da851); color: white; padding: 20px; text-align: center; border-radius: 20px 20px 0 0;">
+                <div style="font-size: 2rem; margin-bottom: 8px;">💬</div>
+                <h3 style="margin: 0; font-size: 1.1rem;">Compartilhar no WhatsApp</h3>
+            </div>
+            
+            <!-- Conteúdo -->
+            <div style="padding: 24px;">
+                <p style="margin: 0 0 18px; color: #666; text-align: center;">Escolha com quem deseja compartilhar:</p>
+                
+                <!-- Opção 1: Rose -->
+                <button id="btn-whatsapp-rose" style="width: 100%; padding: 14px; border: 2px solid #25d366; background: white; border-radius: 12px; cursor: pointer; margin-bottom: 12px; transition: all 0.2s; display: flex; align-items: center; gap: 12px; font-size: 0.95rem;">
+                    <span style="font-size: 1.8rem;">🌸</span>
+                    <div style="text-align: left; flex: 1;">
+                        <div style="font-weight: bold; color: #333;">Rose (Vendedora)</div>
+                        <div style="font-size: 0.8rem; color: #999;">(16) 99183-9509</div>
+                    </div>
+                    <span style="color: #25d366; font-size: 1.2rem;">→</span>
+                </button>
+                
+                <!-- Opção 2: Meus Contatos -->
+                <button id="btn-whatsapp-contatos" style="width: 100%; padding: 14px; border: 2px solid #2196F3; background: white; border-radius: 12px; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 12px; font-size: 0.95rem;">
+                    <span style="font-size: 1.8rem;">👥</span>
+                    <div style="text-align: left; flex: 1;">
+                        <div style="font-weight: bold; color: #333;">Meus Contatos</div>
+                        <div style="font-size: 0.8rem; color: #999;">Escolher um contato pessoal</div>
+                    </div>
+                    <span style="color: #2196F3; font-size: 1.2rem;">→</span>
+                </button>
+            </div>
+            
+            <!-- Botão Cancelar -->
+            <div style="padding: 0 24px 20px; text-align: center;">
+                <button id="btn-cancelar-whatsapp" style="width: 100%; padding: 12px; background: #f0f0f0; color: #666; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; transition: all 0.2s;">Cancelar</button>
             </div>
         </div>
     </div>

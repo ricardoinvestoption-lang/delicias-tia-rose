@@ -552,6 +552,42 @@ header h1:hover {
     transform: translateY(0);
 }
 
+/* --- BOTÕES DO MODAL DE CONTATOS WHATSAPP --- */
+#btn-whatsapp-rose:hover,
+#btn-whatsapp-contatos:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    transform: translateY(-2px);
+}
+
+#btn-whatsapp-rose:active,
+#btn-whatsapp-contatos:active {
+    transform: translateY(0);
+}
+
+#btn-cancelar-whatsapp:hover {
+    background: #e0e0e0;
+}
+
+#btn-cancelar-whatsapp:active {
+    transform: scale(0.98);
+}
+
+/* --- BOTÃO COMPARTILHAR IMAGEM (ADMIN) --- */
+#btn-compartilhar-contatos {
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(255, 152, 0, 0.3);
+}
+
+#btn-compartilhar-contatos:hover {
+    background: #FB8C00;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(255, 152, 0, 0.4);
+}
+
+#btn-compartilhar-contatos:active {
+    transform: translateY(0);
+}
+
 /* --- ANIMAÇÕES GERAIS --- */
 @keyframes fadeInDown {
     from {
