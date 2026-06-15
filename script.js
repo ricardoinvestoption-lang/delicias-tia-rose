@@ -407,6 +407,9 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // Variáveis globais para datas
+    let dadosDatas = { pedidosParaDia: '', encomeddasAte: '' };
+
     async function inicializarFirebase() {
         await aguardarFirebase();
         
@@ -506,6 +509,50 @@ document.addEventListener('DOMContentLoaded', () => {
                 inicializarVitrine();
             } catch (e) {
                 alert("Erro ao salvar seleção.");
+            }
+        };
+
+        // ========== DATAS DE PEDIDOS E ENCOMENDAS ==========
+        async function carregarDatas() {
+            try {
+                const datasDoc = await getDoc(doc(db, "configuracoes", "datas_pedidos"));
+                if (datasDoc.exists()) {
+                    dadosDatas = datasDoc.data();
+                    const inputPedidos = document.getElementById('inputPedidosParaDia');
+                    const inputEncomendas = document.getElementById('inputEncomeddasAte');
+                    if (inputPedidos && dadosDatas.pedidosParaDia) inputPedidos.value = dadosDatas.pedidosParaDia;
+                    if (inputEncomendas && dadosDatas.encomeddasAte) inputEncomendas.value = dadosDatas.encomeddasAte;
+                }
+            } catch (e) {
+                console.error("Erro ao carregar datas:", e);
+            }
+        }
+
+        window.salvarDatas = async function() {
+            const pedidosParaDia = document.getElementById('inputPedidosParaDia')?.value.trim();
+            const encomeddasAte = document.getElementById('inputEncomeddasAte')?.value.trim();
+            
+            if (!pedidosParaDia || !encomeddasAte) {
+                alert("Preencha ambos os campos de datas!");
+                return;
+            }
+            
+            try {
+                await setDoc(doc(db, "configuracoes", "datas_pedidos"), {
+                    pedidosParaDia: pedidosParaDia,
+                    encomeddasAte: encomeddasAte,
+                    atualizadoEm: new Date()
+                });
+                dadosDatas = { pedidosParaDia, encomeddasAte };
+                const statusSpan = document.getElementById('statusDatas');
+                if (statusSpan) {
+                    statusSpan.innerHTML = '✅ Salvo!';
+                    setTimeout(() => { if (statusSpan) statusSpan.innerHTML = ''; }, 2000);
+                }
+                alert("✅ Datas salvas com sucesso!");
+            } catch (e) {
+                alert("Erro ao salvar datas.");
+                console.error(e);
             }
         };
 
@@ -1016,6 +1063,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // ========== INICIALIZAÇÃO ==========
         await carregarProdutosSemana();
         carregarBanner();
+        carregarDatas();
         inicializarVitrine();
         carregarListaProdutosAdmin();
         carregarListaProdutosGerenciar();
@@ -1024,6 +1072,10 @@ document.addEventListener('DOMContentLoaded', () => {
         // Botão de salvar produtos
         const btnSalvar = document.getElementById('btnSalvarProdutosSemana');
         if (btnSalvar) btnSalvar.addEventListener('click', window.salvarProdutosSemana);
+
+        // Botão de salvar datas
+        const btnSalvarDatas = document.getElementById('btnSalvarDatas');
+        if (btnSalvarDatas) btnSalvarDatas.addEventListener('click', window.salvarDatas);
 
         // Botões do banner
         const salvarBannerBtn = document.getElementById('salvarBannerBtn');
@@ -1455,86 +1507,108 @@ document.addEventListener('DOMContentLoaded', () => {
     let imagemCapturada = null;
 
     window.abrirPrintSemana = function() {
-        const modal = document.getElementById('modal-print-semana');
-        const conteudo = document.getElementById('conteudo-print-semana');
-        if (!modal || !conteudo) return;
+        try {
+            console.log('abrirPrintSemana chamada'); // DEBUG
+            const modal = document.getElementById('modal-print-semana');
+            const conteudo = document.getElementById('conteudo-print-semana');
+            if (!modal || !conteudo) {
+                console.error('Modal ou conteudo não encontrado');
+                alert('Erro: Modal não encontrado. Recarregue a página.');
+                return;
+            }
 
-        // Recolher dados dos produtos da semana
-        const listaPromocoes = document.getElementById('listaPromocoes');
-        if (!listaPromocoes || !listaPromocoes.querySelector('.card')) {
-            alert('Nenhum produto selecionado para esta semana.');
-            return;
+            // Recolher dados dos produtos da semana
+            const listaPromocoes = document.getElementById('listaPromocoes');
+            if (!listaPromocoes || !listaPromocoes.querySelector('.card')) {
+                alert('Nenhum produto selecionado para esta semana.');
+                return;
+            }
+
+            // Extrair informações dos produtos
+            const produtos = [];
+            listaPromocoes.querySelectorAll('.card').forEach(card => {
+                const nome = card.querySelector('.card-name')?.textContent || 'Produto';
+                const preco = card.querySelector('.card-price')?.textContent || 'R$ 0,00';
+                const img = card.querySelector('img')?.src || '';
+                produtos.push({ nome, preco, img });
+            });
+
+            // Gerar HTML para preview
+            const dataAtual = new Date().toLocaleDateString('pt-BR', { 
+                weekday: 'long', 
+                day: '2-digit', 
+                month: 'long',
+                year: 'numeric'
+            }).replace(/^[a-z]/, c => c.toUpperCase());
+
+            const htmlProdutos = produtos.map(p => `
+                <div style="display: flex; gap: 12px; margin-bottom: 12px; background: white; padding: 12px; border-radius: 10px; border: 1px solid #e0e0e0;">
+                    <img src="${p.img}" alt="" style="width: 60px; height: 60px; object-fit: cover; border-radius: 8px;">
+                    <div style="flex: 1;">
+                        <div style="font-weight: bold; color: #333; margin-bottom: 4px;">${escapeHtml(p.nome)}</div>
+                        <div style="color: #6d4c41; font-weight: bold; font-size: 1rem;">${p.preco}</div>
+                    </div>
+                </div>
+            `).join('');
+
+            // Preparar HTML de datas
+            let htmlDatas = '';
+            if (dadosDatas && dadosDatas.pedidosParaDia) {
+                htmlDatas += `<div style="margin-bottom: 8px; color: #333;"><strong>📦 Pedidos para dia:</strong><br>${escapeHtml(dadosDatas.pedidosParaDia)}</div>`;
+            }
+            if (dadosDatas && dadosDatas.encomeddasAte) {
+                htmlDatas += `<div style="color: #333;"><strong>🛍️ Encomendas até dia:</strong><br>${escapeHtml(dadosDatas.encomeddasAte)}</div>`;
+            }
+            const divDatas = htmlDatas ? `<div style="background: white; padding: 12px; border-radius: 10px; border: 1px solid #ddd; margin-bottom: 16px; font-size: 0.9rem; text-align: center;">${htmlDatas}</div>` : '';
+
+            conteudo.innerHTML = `
+                <div style="text-align: center; margin-bottom: 24px;">
+                    <img src="logo.png" alt="Logo" style="width: 60px; height: 60px; margin-bottom: 12px; object-fit: contain;">
+                    <h2 style="color: #6d4c41; margin: 0 0 8px; font-size: 1.4rem;">🌸 Delícias da Tia Rose</h2>
+                    <p style="color: #888; margin: 0; font-size: 0.9rem;">Doces feitos com amor</p>
+                </div>
+                
+                <div style="background: linear-gradient(135deg, #6d4c41, #5d4037); color: white; padding: 12px; border-radius: 12px; text-align: center; margin-bottom: 20px;">
+                    <div style="font-size: 1.2rem; font-weight: bold; margin-bottom: 4px;">🔥 Nesta Semana</div>
+                </div>
+                
+                <div style="margin-bottom: 20px;">
+                    ${htmlProdutos}
+                </div>
+                
+                <div style="background: #faf7f2; padding: 14px; border-radius: 10px; border: 2px solid #6d4c41; margin-bottom: 16px; text-align: center;">
+                    <div style="font-size: 1.1rem; font-weight: bold; color: #6d4c41; margin-bottom: 8px;">📞 Para Pedir!</div>
+                    <div style="color: #333; font-size: 0.95rem; margin-bottom: 6px;">
+                        <strong>Rose</strong> 🌸
+                    </div>
+                    <div style="color: #25d366; font-weight: bold; font-size: 1rem; margin-bottom: 8px;">
+                        WhatsApp: <strong>(16) 99183-9509</strong>
+                    </div>
+                    <div style="font-size: 0.85rem; color: #666;">
+                        📱 <u>Baixe nosso App!</u>
+                    </div>
+                </div>
+                
+                ${divDatas}
+                
+                <div style="text-align: center; font-size: 0.8rem; color: #aaa;">
+                    Compartilhado em ${dataAtual}
+                </div>
+            `;
+
+            // Mostrar/esconder botão de compartilhar baseado no modo admin
+            const estaNoModoAdmin = adminSection && adminSection.style.display === 'block';
+            const btnCompartilhar = document.getElementById('btn-compartilhar-contatos');
+            if (btnCompartilhar) {
+                btnCompartilhar.style.display = estaNoModoAdmin ? 'flex' : 'none';
+            }
+
+            modal.style.display = 'flex';
+            console.log('Modal exibido com sucesso');
+        } catch (error) {
+            console.error('Erro em abrirPrintSemana:', error);
+            alert('Erro ao abrir o compartilhador: ' + error.message);
         }
-
-        // Extrair informações dos produtos
-        const produtos = [];
-        listaPromocoes.querySelectorAll('.card').forEach(card => {
-            const nome = card.querySelector('.card-name')?.textContent || 'Produto';
-            const preco = card.querySelector('.card-price')?.textContent || 'R$ 0,00';
-            const img = card.querySelector('img')?.src || '';
-            produtos.push({ nome, preco, img });
-        });
-
-        // Gerar HTML para preview
-        const dataAtual = new Date().toLocaleDateString('pt-BR', { 
-            weekday: 'long', 
-            day: '2-digit', 
-            month: 'long',
-            year: 'numeric'
-        }).replace(/^[a-z]/, c => c.toUpperCase());
-
-        const htmlProdutos = produtos.map(p => `
-            <div style="display: flex; gap: 12px; margin-bottom: 12px; background: white; padding: 12px; border-radius: 10px; border: 1px solid #e0e0e0;">
-                <img src="${p.img}" alt="" style="width: 60px; height: 60px; object-fit: cover; border-radius: 8px;">
-                <div style="flex: 1;">
-                    <div style="font-weight: bold; color: #333; margin-bottom: 4px;">${escapeHtml(p.nome)}</div>
-                    <div style="color: #6d4c41; font-weight: bold; font-size: 1rem;">${p.preco}</div>
-                </div>
-            </div>
-        `).join('');
-
-        conteudo.innerHTML = `
-            <div style="text-align: center; margin-bottom: 24px;">
-                <img src="logo.png" alt="Logo" style="width: 60px; height: 60px; margin-bottom: 12px; object-fit: contain;">
-                <h2 style="color: #6d4c41; margin: 0 0 8px; font-size: 1.4rem;">🌸 Delícias da Tia Rose</h2>
-                <p style="color: #888; margin: 0; font-size: 0.9rem;">Doces feitos com amor</p>
-            </div>
-            
-            <div style="background: linear-gradient(135deg, #6d4c41, #5d4037); color: white; padding: 12px; border-radius: 12px; text-align: center; margin-bottom: 20px;">
-                <div style="font-size: 1.2rem; font-weight: bold; margin-bottom: 4px;">🔥 Nesta Semana</div>
-                <div style="font-size: 0.9rem;">${dataAtual}</div>
-            </div>
-            
-            <div style="margin-bottom: 20px;">
-                ${htmlProdutos}
-            </div>
-            
-            <div style="background: #faf7f2; padding: 14px; border-radius: 10px; border: 2px solid #6d4c41; margin-bottom: 16px; text-align: center;">
-                <div style="font-size: 1.1rem; font-weight: bold; color: #6d4c41; margin-bottom: 8px;">📞 Para Pedir!</div>
-                <div style="color: #333; font-size: 0.95rem; margin-bottom: 6px;">
-                    <strong>Rose</strong> 🌸
-                </div>
-                <div style="color: #25d366; font-weight: bold; font-size: 1rem; margin-bottom: 8px;">
-                    WhatsApp: <strong>(16) 99183-9509</strong>
-                </div>
-                <div style="font-size: 0.85rem; color: #666;">
-                    📱 <u>Baixe nosso App!</u>
-                </div>
-            </div>
-            
-            <div style="text-align: center; font-size: 0.8rem; color: #aaa;">
-                Compartilhado em ${dataAtual}
-            </div>
-        `;
-
-        // Mostrar/esconder botão de compartilhar baseado no modo admin
-        const estaNoModoAdmin = adminSection && adminSection.style.display === 'block';
-        const btnCompartilhar = document.getElementById('btn-compartilhar-contatos');
-        if (btnCompartilhar) {
-            btnCompartilhar.style.display = estaNoModoAdmin ? 'flex' : 'none';
-        }
-
-        modal.style.display = 'flex';
     };
 
     window.capturarImagemPrint = async function() {

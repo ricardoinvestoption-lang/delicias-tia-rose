@@ -252,6 +252,22 @@
             </div>
 
             <div style="background:#faf7f2; border:1px solid #d7ccc8; border-radius:10px; padding:15px; margin-bottom:20px;">
+                <h3 style="margin:0 0 10px; color:#6d4c41;">📅 Datas de Pedidos e Encomendas</h3>
+                <p style="font-size:0.85rem; color:#666; margin-bottom:15px;">Configure os prazos para pedidos e encomendas que aparecerão no compartilhamento</p>
+                <div style="display:flex; gap:15px; flex-wrap:wrap; margin-bottom:15px;">
+                    <div style="flex:1; min-width:200px;">
+                        <label style="display:block; font-weight:bold; color:#6d4c41; margin-bottom:5px; font-size:0.9rem;">📦 Pedidos para dia:</label>
+                        <input type="text" id="inputPedidosParaDia" placeholder="Ex: 17 Quarta-feira" style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px; box-sizing:border-box; font-size:0.95rem;">
+                    </div>
+                    <div style="flex:1; min-width:200px;">
+                        <label style="display:block; font-weight:bold; color:#6d4c41; margin-bottom:5px; font-size:0.9rem;">🛍️ Encomendas Até dia:</label>
+                        <input type="text" id="inputEncomeddasAte" placeholder="Ex: 16 Terça-feira" style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px; box-sizing:border-box; font-size:0.95rem;">
+                    </div>
+                </div>
+                <button id="btnSalvarDatas" style="background:#6d4c41; color:white; padding:10px 20px; border:none; border-radius:8px; cursor:pointer; font-weight:bold;">💾 Salvar Datas</button>
+            </div>
+
+            <div style="background:#faf7f2; border:1px solid #d7ccc8; border-radius:10px; padding:15px; margin-bottom:20px;">
                 <h3 style="margin:0 0 10px; color:#6d4c41;" id="titulo-form-produto">➕ Adicionar Novo Produto</h3>
                 <p style="font-size:0.85rem; color:#666; margin-bottom:15px;">Preencha os campos abaixo para adicionar um novo produto ao catálogo</p>
                 <form id="doceForm">
